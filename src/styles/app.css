@@ -42,7 +42,9 @@ button, input, select, textarea { font: inherit; color: inherit; }
   display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
   padding: 10px 16px; background: var(--panel); border-bottom: 1px solid var(--border);
 }
-.brand { font-weight: 600; font-size: 16px; margin-right: 8px; white-space: nowrap; }
+.brand { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; font-size: 16px; margin-right: 8px; white-space: nowrap; }
+.brand img { width: 28px; height: 28px; }
+@media (prefers-color-scheme: dark) { .brand img { filter: invert(1); } }
 .brand b { color: var(--accent); }
 .tabs { display: inline-flex; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 2px; }
 .tabs button { border: 0; background: transparent; padding: 5px 14px; border-radius: 6px; cursor: pointer; color: var(--muted); }

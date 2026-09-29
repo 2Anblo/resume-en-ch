@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { esc, inline, lines, safeUrl } from '../src/util';
+import { contactHref, esc, inline, lines, safeUrl } from '../src/util';
 import { normalize } from '../src/store';
 import { sampleEn, sampleZh } from '../src/samples';
 import { renderJake } from '../src/templates/jake';
@@ -18,6 +18,13 @@ describe('util', () => {
     expect(safeUrl('a@b.co')).toBe('mailto:a@b.co');
     expect(safeUrl('github.com/x')).toBe('https://github.com/x');
     expect(safeUrl('javascript:alert(1)')).toBe('');
+  });
+  it('auto-links contacts that look like emails or URLs', () => {
+    expect(contactHref({ text: 'me@x.com', link: '' })).toBe('mailto:me@x.com');
+    expect(contactHref({ text: 'github.com/me', link: '' })).toBe('https://github.com/me');
+    expect(contactHref({ text: '138-0000-0000', link: '' })).toBe('');
+    expect(contactHref({ text: '上海', link: '' })).toBe('');
+    expect(contactHref({ text: 'Portfolio', link: 'me.dev' })).toBe('https://me.dev');
   });
   it('splits bullet lines and strips list markers', () => {
     expect(lines('- one\n\n• two\n  three  ')).toEqual(['one', 'two', 'three']);

@@ -1,11 +1,11 @@
 import type { Entry, Resume, Section } from '../types';
-import { esc, inline, lines, safeUrl } from '../util';
+import { contactHref, esc, inline, lines } from '../util';
 
 export function renderZh(r: Resume): string {
   const contacts = r.contacts
     .filter((c) => c.text.trim())
     .map((c) => {
-      const href = safeUrl(c.link);
+      const href = contactHref(c);
       return `<span>${href ? `<a href="${href}">${esc(c.text)}</a>` : esc(c.text)}</span>`;
     })
     .join('');

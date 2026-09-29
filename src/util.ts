@@ -34,3 +34,12 @@ export function lines(s: string): string[] {
 export function uid(): string {
   return Math.random().toString(36).slice(2, 10);
 }
+
+/** Link for a contact: the explicit link, else the text itself when it looks like an email or URL. */
+export function contactHref(c: { text: string; link: string }): string {
+  const explicit = safeUrl(c.link);
+  if (explicit) return explicit;
+  const t = c.text.trim();
+  if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(t) || /^(https?:\/\/|www\.)\S+$/i.test(t) || /^[\w-]+(\.[\w-]+)+\/\S*$/.test(t)) return safeUrl(t);
+  return '';
+}

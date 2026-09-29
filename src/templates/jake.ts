@@ -1,12 +1,12 @@
 import type { Entry, Resume, Section } from '../types';
-import { esc, inline, lines, safeUrl } from '../util';
+import { contactHref, esc, inline, lines } from '../util';
 
 /** HTML port of Jake's Resume (https://github.com/jakegut/resume, MIT). */
 export function renderJake(r: Resume): string {
   const contacts = r.contacts
     .filter((c) => c.text.trim())
     .map((c) => {
-      const href = safeUrl(c.link);
+      const href = contactHref(c);
       return href ? `<a href="${href}"><u>${esc(c.text)}</u></a>` : esc(c.text);
     })
     .join('<span class="sep">|</span>');

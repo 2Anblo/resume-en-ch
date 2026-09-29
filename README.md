@@ -18,8 +18,10 @@
 
 点击右上角「下载 PDF」，在打印窗口中：
 
-1. 目标打印机选择 **另存为 PDF**
-2. 页边距已由模板内置，浏览器不会再加日期、网址等页眉页脚（个别浏览器仍显示时，取消勾选 **页眉和页脚**）
+1. 目标打印机选择 **另存为 PDF**（Save as PDF，可保留可点击的链接）
+2. 在「更多设置」里**取消勾选「页眉和页脚」**（Headers and footers），否则 PDF 顶部和底部会多出日期、网址和页码。Chrome 会记住这个选择，只需设置一次
+
+![打印设置：取消勾选页眉和页脚](docs/print-settings.png)
 
 推荐使用 Chrome / Edge，排版与预览最一致。
 
@@ -70,7 +72,7 @@ An open-source, client-side resume generator for English and Chinese resumes. Ed
 - Add, remove and reorder sections and entries; `**bold**` and `[text](url)` in bullets
 - Letter / A4, with page-break guides in the preview
 
-**Saving the PDF:** click *Download PDF*, choose *Save as PDF*. Margins are built into the template, so the browser adds no date/URL header or footer (if one still shows, untick *Headers and footers*). Chrome or Edge gives the closest match to the preview.
+**Saving the PDF:** click *Download PDF*, choose *Save as PDF*, and under *More settings* untick *Headers and footers* so the browser does not add the date, URL and page numbers (see the screenshot above; Chrome remembers it). Chrome or Edge gives the closest match to the preview.
 
 **Development:** `npm install`, `npm run dev`, `npm test`, `npm run build`.
 

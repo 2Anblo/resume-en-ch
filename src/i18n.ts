@@ -17,7 +17,7 @@ const dict = {
     skillLabel: '类别', skillValue: '内容', text: '内容（每行一段）',
     addSection: '添加模块', kinds: { entries: '经历（教育/工作）', projects: '项目', skills: '技能', text: '文本' },
     up: '上移', down: '下移', remove: '删除',
-    printTip: '点击“下载 PDF”后，在打印窗口的目标打印机中选择“另存为 PDF”，边距保持“默认”，并取消勾选“页眉和页脚”。',
+    printTip: '点击“下载 PDF”后，在打印窗口的目标打印机中选择“另存为 PDF”即可（若仍看到页眉页脚，取消勾选“页眉和页脚”）。',
     saved: '已自动保存到本浏览器', source: '开源代码',
   },
   en: {
@@ -36,7 +36,7 @@ const dict = {
     skillLabel: 'Category', skillValue: 'Items', text: 'Text (one paragraph per line)',
     addSection: 'Add section', kinds: { entries: 'Experience / Education', projects: 'Projects', skills: 'Skills', text: 'Text' },
     up: 'Move up', down: 'Move down', remove: 'Delete',
-    printTip: 'After clicking "Download PDF", pick "Save as PDF" as the destination, keep margins on "Default" and untick "Headers and footers".',
+    printTip: 'After clicking "Download PDF", pick "Save as PDF" as the destination (if you still see a header or footer, untick "Headers and footers").',
     saved: 'Saved in this browser automatically', source: 'Source',
   },
 };

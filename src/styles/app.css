@@ -120,7 +120,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
   .layout, .stage { display: block; padding: 0; overflow: visible; background: #fff; }
   .page-wrap { width: auto !important; height: auto !important; }
   .page-wrap .page { position: static; transform: none !important; box-shadow: none; width: auto; min-height: 0; }
-  .page .jake, .page .zh { padding: 0; }
+  .page .jake, .page .zh { -webkit-box-decoration-break: clone; box-decoration-break: clone; }
   .page ul ul li, .page .zh ul li, .page .row, .page .skills div { break-inside: avoid; }
   .page .row { break-after: avoid; }
   .page h2 { break-after: avoid; }

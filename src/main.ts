@@ -38,14 +38,13 @@ function savePrefs() {
   }
 }
 
-const MARGINS: Record<Lang, string> = { en: '0.5in 0.5in 0.45in', zh: '16mm 16mm 14mm' };
-
 function renderPreview() {
   const r = cur();
   page.dataset.size = r.pageSize;
   page.innerHTML = lang === 'en' ? renderJake(r) : renderZh(r);
-  // Print margins live on @page so every page (not just the first) gets them.
-  pageStyle.textContent = `@page { size: ${r.pageSize === 'a4' ? 'A4' : 'letter'}; margin: ${MARGINS[lang]}; }`;
+  // Zero @page margin leaves browsers no room for their date/URL header and footer;
+  // the template's own padding (cloned onto every printed page) provides the margins.
+  pageStyle.textContent = `@page { size: ${r.pageSize === 'a4' ? 'A4' : 'letter'}; margin: 0; }`;
   fitPreview();
 }
 

@@ -1,14 +1,17 @@
 import '@fontsource/noto-sans-sc/400.css';
+import '@fontsource/noto-sans-sc/500.css';
 import '@fontsource/noto-sans-sc/700.css';
+import '@fontsource/noto-serif-sc/400.css';
+import '@fontsource/noto-serif-sc/700.css';
+import 'lxgw-wenkai-webfont/lxgwwenkai-regular.css';
 import './styles/app.css';
 import './styles/resume.css';
 
 import { applyAction, renderEditor, setPath } from './editor';
 import { t, type UiLang } from './i18n';
 import { load, normalize, sample, save } from './store';
-import { renderJake } from './templates/jake';
-import { renderZh } from './templates/zh';
-import type { Lang, PageSize, Resume } from './types';
+import { templateOf, templatesFor } from './templates';
+import type { Lang, PageSize, Resume, TemplateId } from './types';
 
 const PREF = 'resume-en-ch:prefs';
 const prefs = (() => {
@@ -41,7 +44,7 @@ function savePrefs() {
 function renderPreview() {
   const r = cur();
   page.dataset.size = r.pageSize;
-  page.innerHTML = lang === 'en' ? renderJake(r) : renderZh(r);
+  page.innerHTML = templateOf(r).render(r);
   // Zero @page margin leaves browsers no room for their date/URL header and footer;
   // the template's own padding (cloned onto every printed page) provides the margins.
   pageStyle.textContent = `@page { size: ${r.pageSize === 'a4' ? 'A4' : 'letter'}; margin: 0; }`;
@@ -60,6 +63,9 @@ function renderAll() {
   document.querySelectorAll<HTMLButtonElement>('[data-tpl]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tpl === lang)));
   $<HTMLButtonElement>('#ui-lang').textContent = ui === 'zh' ? 'EN' : '中';
   $<HTMLSelectElement>('#page-size').value = cur().pageSize;
+  $<HTMLSelectElement>('#template').innerHTML = templatesFor(lang)
+    .map((tp) => `<option value="${tp.id}"${tp.id === templateOf(cur()).id ? ' selected' : ''}>${tp.name[ui]}</option>`)
+    .join('');
   editor.innerHTML = renderEditor(cur(), d, collapsed);
   renderPreview();
 }
@@ -89,11 +95,10 @@ function fitPreview() {
 }
 
 /** Dashed guides where printed page breaks will fall. */
-const PX: Record<Lang, [number, number]> = { en: [0.5 * 96, 0.45 * 96], zh: [(16 * 96) / 25.4, (14 * 96) / 25.4] };
 function drawBreaks() {
   page.querySelectorAll('.page-break').forEach((el) => el.remove());
   const pageH = cur().pageSize === 'a4' ? (297 * 96) / 25.4 : 11 * 96;
-  const [top, bottom] = PX[lang];
+  const [top, bottom] = templateOf(cur()).pad;
   const contentH = pageH - top - bottom;
   for (let y = top + contentH; y < page.scrollHeight - bottom; y += contentH) {
     const line = document.createElement('div');
@@ -175,6 +180,11 @@ $('#ui-lang').addEventListener('click', () => {
 $<HTMLSelectElement>('#page-size').addEventListener('change', (e) => {
   cur().pageSize = (e.target as HTMLSelectElement).value as PageSize;
   changed();
+});
+
+$<HTMLSelectElement>('#template').addEventListener('change', (e) => {
+  cur().template = (e.target as HTMLSelectElement).value as TemplateId;
+  changed(true);
 });
 
 $('#reset').addEventListener('click', () => {

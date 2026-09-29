@@ -5,7 +5,9 @@
 一个开源、纯前端的中英文简历生成网页：在浏览器里填写内容、实时预览，一键导出 PDF。数据只保存在你自己的浏览器里，不上传任何服务器。
 
 - **英文模板**：复刻 Overleaf 上最经典的 [Jake's Resume](https://github.com/jakegut/resume)（Computer Modern 字体、小型大写标题、横线分隔）
-- **中文模板**：简洁整洁的单栏布局，内置思源黑体（Noto Sans SC），可选证件照
+- **中文模板（简洁）**：简洁整洁的单栏布局，内置思源黑体（Noto Sans SC），可选证件照
+- **Resume-NG 模板**：参考 [fky2015/resume-ng](https://github.com/fky2015/resume-ng) 的高信息密度排版（黑体标题、宋体正文、楷体补充信息），中英文简历都可用
+- 在顶部「模板」下拉框里随时切换模板，内容不变
 - **导出 PDF**：使用浏览器打印生成矢量 PDF，文字可选中、可被 ATS 解析
 - **导入 / 导出 JSON**：方便备份和版本管理；自动保存到 localStorage
 - 自由增删、排序模块和条目，支持 `**加粗**` 与 `[文字](链接)`
@@ -13,6 +15,7 @@
 
 ![英文模板](docs/screenshot-en.png)
 ![中文模板](docs/screenshot-zh.png)
+![Resume-NG 模板](docs/screenshot-ng.png)
 
 ## 下载 PDF
 
@@ -47,19 +50,22 @@ npm run build    # 构建到 dist/
 ```
 src/
   templates/jake.ts   英文模板（Jake's Resume）
-  templates/zh.ts     中文模板
+  templates/zh.ts     中文模板（简洁）
+  templates/ng.ts     Resume-NG 模板
+  templates/index.ts  模板注册表（名称、适用语言、页边距）
   styles/resume.css   两套模板的排版样式
   editor.ts           左侧表单编辑器
   store.ts            本地存储与 JSON 导入校验
   samples.ts          示例数据
 ```
 
-新增模板：在 `src/templates/` 写一个 `render(resume) => html` 函数，并在 `resume.css` 里加样式即可。
+新增模板：在 `src/templates/` 写一个 `render(resume) => html` 函数，在 `src/templates/index.ts` 注册，并在 `resume.css` 里加样式即可。
 
 ## 致谢与许可
 
 - 英文模板版式来自 [Jake Gutierrez 的 Jake's Resume](https://github.com/jakegut/resume)（MIT），示例内容亦出自该模板
-- 字体：[CMU Serif](https://cm-unicode.sourceforge.io/)（SIL OFL）、[Noto Sans SC](https://fonts.google.com/noto/specimen/Noto+Sans+SC)（SIL OFL，经 Fontsource 分包加载）
+- Resume-NG 模板的版式参考 [Feng Kaiyu 的 Resume-NG](https://github.com/fky2015/resume-ng)（LPPL 1.3c），本项目用 HTML/CSS 重新实现，未复制其 LaTeX 代码
+- 字体：[CMU Serif](https://cm-unicode.sourceforge.io/)（SIL OFL）、[Noto Sans SC / Noto Serif SC](https://fonts.google.com/noto)（SIL OFL，经 Fontsource 分包加载）、[霞鹜文楷 LXGW WenKai](https://github.com/lxgw/LxgwWenKai)（SIL OFL）
 - 本项目代码使用 [MIT](LICENSE) 许可
 
 ---
@@ -69,7 +75,8 @@ src/
 An open-source, client-side resume generator for English and Chinese resumes. Edit in the browser with a live preview and export a PDF in one click. Your data stays in your browser.
 
 - **English template**: a faithful HTML port of [Jake's Resume](https://github.com/jakegut/resume), the most popular resume template on Overleaf (Computer Modern, small-caps headings, rules)
-- **Chinese template**: a clean single-column layout with bundled Noto Sans SC and an optional photo
+- **Chinese template (Simple)**: a clean single-column layout with bundled Noto Sans SC and an optional photo
+- **Resume-NG template**: a dense layout modeled on [fky2015/resume-ng](https://github.com/fky2015/resume-ng), for Chinese or English resumes; switch templates from the *Template* menu without losing content
 - **PDF export** through the browser's print engine: vector output, selectable, ATS-friendly text
 - JSON import/export and automatic saving to localStorage
 - Add, remove and reorder sections and entries; `**bold**` and `[text](url)` in bullets
@@ -81,4 +88,4 @@ An open-source, client-side resume generator for English and Chinese resumes. Ed
 
 **Deployment:** `.github/workflows/deploy.yml` tests and builds every PR and deploys `main` to GitHub Pages. Set *Settings → Pages → Source* to *GitHub Actions* once.
 
-Licensed under [MIT](LICENSE). Layout of the English template from Jake Gutierrez's Jake's Resume (MIT). Fonts: CMU Serif and Noto Sans SC (SIL OFL).
+Licensed under [MIT](LICENSE). Layout of the English template from Jake Gutierrez's Jake's Resume (MIT); Resume-NG layout after Feng Kaiyu's Resume-NG (LPPL 1.3c), reimplemented in HTML/CSS. Fonts: CMU Serif, Noto Sans/Serif SC and LXGW WenKai (SIL OFL).

@@ -14,6 +14,7 @@ export function sampleEn(): Resume {
   return {
     version: 1,
     lang: 'en',
+    template: 'jake',
     name: 'Jake Ryan',
     headline: '',
     photo: '',
@@ -100,6 +101,7 @@ export function sampleZh(): Resume {
   return {
     version: 1,
     lang: 'zh',
+    template: 'zh-simple',
     name: '张三',
     headline: '求职意向：后端开发工程师',
     photo: '',

@@ -4,6 +4,7 @@ import { normalize } from '../src/store';
 import { sampleEn, sampleZh } from '../src/samples';
 import { renderJake } from '../src/templates/jake';
 import { renderZh } from '../src/templates/zh';
+import { renderNg } from '../src/templates/ng';
 
 describe('util', () => {
   it('escapes HTML', () => {
@@ -38,6 +39,9 @@ describe('store.normalize', () => {
   it('repairs malformed input', () => {
     const r = normalize({ lang: 'zh', sections: [{ kind: 'bogus', entries: [{ title: 1, bullets: ['a', 'b'] }] }], photo: 'http://x' }, 'en');
     expect(r.lang).toBe('zh');
+    expect(r.template).toBe('zh-simple');
+    expect(normalize({ lang: 'en', template: 'zh-simple' }, 'en').template).toBe('jake');
+    expect(normalize({ lang: 'zh', template: 'ng' }, 'en').template).toBe('ng');
     expect(r.pageSize).toBe('a4');
     expect(r.photo).toBe('');
     expect(r.sections[0].kind).toBe('entries');
@@ -49,6 +53,8 @@ describe('templates', () => {
   it('render the samples', () => {
     expect(renderJake(sampleEn())).toContain('Jake Ryan');
     expect(renderZh(sampleZh())).toContain('教育背景');
+    expect(renderNg(sampleZh())).toContain('教育背景');
+    expect(renderNg(sampleEn())).toContain('Jake Ryan');
   });
   it('escape user content', () => {
     const r = sampleEn();

@@ -41,13 +41,16 @@ export interface Section {
 
 export type PageSize = 'letter' | 'a4';
 
+export type TemplateId = 'jake' | 'zh-simple' | 'ng';
+
 export interface Resume {
   version: 1;
   lang: Lang;
+  template: TemplateId;
   name: string;
-  /** Chinese template only: one-line headline such as 求职意向. */
+  /** One-line headline such as 求职意向 (templates with `headline`). */
   headline: string;
-  /** Chinese template only: optional photo as a data URL. */
+  /** Optional photo as a data URL (templates with `photo`). */
   photo: string;
   contacts: Contact[];
   sections: Section[];

@@ -2,6 +2,7 @@ import type { Dict } from './i18n';
 import type { Resume, Section, SectionKind } from './types';
 import { entry, section } from './samples';
 import { esc } from './util';
+import { templateOf } from './templates';
 
 const KINDS: SectionKind[] = ['entries', 'projects', 'skills', 'text'];
 
@@ -21,6 +22,7 @@ function moveBtns(action: string, args: string, i: number, n: number, d: Dict): 
 }
 
 export function renderEditor(r: Resume, d: Dict, collapsed: Set<string>): string {
+  const tpl = templateOf(r);
   const contacts = r.contacts
     .map(
       (c, i) => `<div class="row-fields">
@@ -32,7 +34,7 @@ export function renderEditor(r: Resume, d: Dict, collapsed: Set<string>): string
     .join('');
 
   const photo =
-    r.lang === 'zh'
+    tpl.photo
       ? `<div class="field wide"><span>${d.photo}</span><div class="photo-row">
           ${r.photo ? `<img src="${esc(r.photo)}" alt="">` : ''}
           <label class="btn small">${d.uploadPhoto}<input type="file" accept="image/*" data-photo hidden></label>
@@ -44,8 +46,8 @@ export function renderEditor(r: Resume, d: Dict, collapsed: Set<string>): string
 <details class="card" open>
   <summary><span class="card-title">${d.basics}</span></summary>
   <div class="grid">
-    ${field(d.name, 'name', r.name, { wide: r.lang === 'en' })}
-    ${r.lang === 'zh' ? field(d.headline, 'headline', r.headline) : ''}
+    ${field(d.name, 'name', r.name, { wide: !tpl.headline })}
+    ${tpl.headline ? field(d.headline, 'headline', r.headline) : ''}
     ${photo}
   </div>
   <h4>${d.contacts}</h4>

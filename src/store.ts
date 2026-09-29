@@ -1,4 +1,5 @@
-import type { Lang, Resume, Section, SectionKind } from './types';
+import type { Lang, Resume, Section, SectionKind, TemplateId } from './types';
+import { templatesFor } from './templates';
 import { sampleEn, sampleZh } from './samples';
 import { uid } from './util';
 
@@ -34,6 +35,7 @@ export function normalize(raw: unknown, fallbackLang: Lang): Resume {
   return {
     version: 1,
     lang,
+    template: templatesFor(lang).some((t) => t.id === o.template) ? (o.template as TemplateId) : templatesFor(lang)[0].id,
     name: str(o.name),
     headline: str(o.headline),
     photo: photo.startsWith('data:image/') ? photo : '',

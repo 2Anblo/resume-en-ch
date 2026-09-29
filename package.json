@@ -1,0 +1,22 @@
+{
+  "name": "resume-en-ch",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Open-source English / Chinese resume generator: Jake's Resume style English template and a clean Chinese template, exported to PDF in the browser.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2",
+    "vite": "^8.3.1",
+    "vitest": "^5.0.2"
+  },
+  "dependencies": {
+    "@fontsource/noto-sans-sc": "^5.3.0"
+  }
+}

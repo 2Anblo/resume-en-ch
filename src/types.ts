@@ -27,8 +27,9 @@ export interface SkillLine {
  * projects: one row (title | subtitle, date) + bullets
  * skills: "Label: value" lines
  * text: free paragraph
+ * table: `text` holds rows, cells separated by "|"; the first row is the header
  */
-export type SectionKind = 'entries' | 'projects' | 'skills' | 'text';
+export type SectionKind = 'entries' | 'projects' | 'skills' | 'text' | 'table';
 
 export interface Section {
   id: string;
@@ -41,7 +42,7 @@ export interface Section {
 
 export type PageSize = 'letter' | 'a4';
 
-export type TemplateId = 'jake' | 'zh-simple' | 'ng';
+export type TemplateId = 'jake' | 'zh-simple' | 'ng' | 'fushi';
 
 export interface Resume {
   version: 1;

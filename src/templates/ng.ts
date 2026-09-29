@@ -1,5 +1,5 @@
 import type { Entry, Resume, Section } from '../types';
-import { contactHref, esc, inline, lines } from '../util';
+import { contactHref, esc, inline, lines, tableHtml } from '../util';
 
 /** HTML take on Resume-NG by Feng Kaiyu (https://github.com/fky2015/resume-ng, LPPL 1.3c). */
 export function renderNg(r: Resume): string {
@@ -15,7 +15,7 @@ export function renderNg(r: Resume): string {
   return `
 <div class="ng" lang="${r.lang === 'zh' ? 'zh-CN' : 'en'}">
   ${photo}
-  <header class="heading">
+  <header class="heading${photo ? ' has-photo' : ''}">
     <h1>${esc(r.name)}</h1>
     ${r.headline.trim() ? `<div class="headline">${inline(r.headline)}</div>` : ''}
     ${contacts ? `<div class="contacts">${contacts}</div>` : ''}
@@ -32,6 +32,7 @@ function renderSection(s: Section): string {
       .filter((k) => k.label.trim() || k.value.trim())
       .map((k) => `<li>${k.label.trim() ? `<strong>${inline(k.label)}</strong>: ` : ''}${inline(k.value)}</li>`)
       .join('')}</ul>`;
+  else if (s.kind === 'table') body = tableHtml(s.text);
   else body = `<ul>${lines(s.text).map((l) => `<li>${inline(l)}</li>`).join('')}</ul>`;
   return `<section><h2>${esc(s.title)}</h2>${body}</section>`;
 }

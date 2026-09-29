@@ -1,12 +1,12 @@
 import type { Lang, Resume, Section, SectionKind, TemplateId } from './types';
 import { templatesFor } from './templates';
-import { sampleEn, sampleZh } from './samples';
+import { sampleEn, sampleFushi, sampleZh } from './samples';
 import { uid } from './util';
 
 const KEY = (lang: Lang) => `resume-en-ch:${lang}`;
 const str = (v: unknown): string => (typeof v === 'string' ? v : v == null ? '' : String(v));
 const arr = (v: unknown): unknown[] => (Array.isArray(v) ? v : []);
-const KINDS: SectionKind[] = ['entries', 'projects', 'skills', 'text'];
+const KINDS: SectionKind[] = ['entries', 'projects', 'skills', 'text', 'table'];
 
 /** Coerces untrusted JSON (import / localStorage) into a well-formed Resume. */
 export function normalize(raw: unknown, fallbackLang: Lang): Resume {
@@ -48,8 +48,11 @@ export function normalize(raw: unknown, fallbackLang: Lang): Resume {
   };
 }
 
-export function sample(lang: Lang): Resume {
-  return lang === 'en' ? sampleEn() : sampleZh();
+export function sample(lang: Lang, template?: TemplateId): Resume {
+  if (lang === 'zh' && template === 'fushi') return sampleFushi();
+  const r = lang === 'en' ? sampleEn() : sampleZh();
+  if (template && templatesFor(lang).some((t) => t.id === template)) r.template = template;
+  return r;
 }
 
 export function load(lang: Lang): Resume {

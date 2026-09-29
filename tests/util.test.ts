@@ -62,3 +62,27 @@ describe('templates', () => {
     expect(renderJake(r)).not.toContain('<script>');
   });
 });
+
+describe('tables and labels', () => {
+  it('splits contact labels but not URLs', async () => {
+    const { splitLabel } = await import('../src/util');
+    expect(splitLabel('电话：138')).toEqual(['电话', '138']);
+    expect(splitLabel('https://x.com')).toEqual(['', 'https://x.com']);
+    expect(splitLabel('a@b.co')).toEqual(['', 'a@b.co']);
+  });
+  it('links a labelled email', () => {
+    expect(contactHref({ text: '邮箱：me@x.com', link: '' })).toBe('mailto:me@x.com');
+  });
+  it('renders table rows and notes, stretching short rows', async () => {
+    const { tableHtml } = await import('../src/util');
+    const html = tableHtml('note\nA | B | C\nx | y');
+    expect(html).toContain('<p class="tbl-note">note</p>');
+    expect(html).toContain('<th>A</th>');
+    expect(html).toContain('<td colspan="2">y</td>');
+  });
+  it('renders the postgraduate sample in every Chinese template', async () => {
+    const { sampleFushi } = await import('../src/samples');
+    const { templatesFor } = await import('../src/templates');
+    for (const t of templatesFor('zh')) expect(t.render(sampleFushi())).toContain('初试成绩');
+  });
+});

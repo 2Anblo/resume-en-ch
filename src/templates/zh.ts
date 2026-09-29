@@ -1,5 +1,5 @@
 import type { Entry, Resume, Section } from '../types';
-import { contactHref, esc, inline, lines } from '../util';
+import { contactHref, esc, inline, lines, tableHtml } from '../util';
 
 export function renderZh(r: Resume): string {
   const contacts = r.contacts
@@ -33,6 +33,7 @@ function renderSection(s: Section): string {
       .filter((k) => k.label.trim() || k.value.trim())
       .map((k) => `<li>${k.label.trim() ? `<strong>${inline(k.label)}：</strong>` : ''}${inline(k.value)}</li>`)
       .join('')}</ul>`;
+  else if (s.kind === 'table') body = tableHtml(s.text);
   else body = lines(s.text).map((l) => `<p>${inline(l)}</p>`).join('');
   return `<section><h2><span>${esc(s.title)}</span></h2>${body}</section>`;
 }

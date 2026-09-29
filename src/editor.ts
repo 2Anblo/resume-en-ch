@@ -4,7 +4,7 @@ import { entry, section } from './samples';
 import { esc } from './util';
 import { templateOf } from './templates';
 
-const KINDS: SectionKind[] = ['entries', 'projects', 'skills', 'text'];
+const KINDS: SectionKind[] = ['entries', 'projects', 'skills', 'text', 'table'];
 
 function field(label: string, path: string, value: string, opts: { area?: boolean; rows?: number; wide?: boolean } = {}): string {
   const control = opts.area
@@ -93,7 +93,8 @@ function renderSection(s: Section, si: number, n: number, d: Dict, collapsed: Se
         )
         .join('') + `<button type="button" class="btn small ghost" data-action="addSkill" data-args="${si}">+ ${d.addSkill}</button>`;
   } else {
-    body = `<div class="grid">${field(d.text, `${p}.text`, s.text, { area: true, rows: 4, wide: true })}</div>`;
+    const table = s.kind === 'table';
+    body = `<div class="grid">${field(table ? d.table : d.text, `${p}.text`, s.text, { area: true, rows: table ? Math.max(3, s.text.split('\n').length) : 4, wide: true })}</div>`;
   }
 
   return `

@@ -19,6 +19,7 @@
   "dependencies": {
     "@fontsource/noto-sans-sc": "^5.3.0",
     "@fontsource/noto-serif-sc": "^5.3.0",
+    "@fontsource/tinos": "^5.3.0",
     "lxgw-wenkai-webfont": "^1.7.0"
   }
 }

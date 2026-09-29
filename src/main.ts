@@ -1,5 +1,7 @@
 import '@fontsource/noto-sans-sc/400.css';
 import '@fontsource/noto-sans-sc/500.css';
+import '@fontsource/tinos/400.css';
+import '@fontsource/tinos/700.css';
 import '@fontsource/noto-sans-sc/700.css';
 import '@fontsource/noto-serif-sc/400.css';
 import '@fontsource/noto-serif-sc/700.css';
@@ -189,7 +191,7 @@ $<HTMLSelectElement>('#template').addEventListener('change', (e) => {
 
 $('#reset').addEventListener('click', () => {
   if (!confirm(t(ui).resetConfirm)) return;
-  docs[lang] = sample(lang);
+  docs[lang] = sample(lang, cur().template);
   save(cur());
   renderAll();
 });

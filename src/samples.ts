@@ -156,3 +156,75 @@ export function sampleZh(): Resume {
     ],
   };
 }
+
+/** Content adapted from the sample in Kody's 中文考研复试简历模板 (MIT). */
+export function sampleFushi(): Resume {
+  return {
+    version: 1,
+    lang: 'zh',
+    template: 'fushi',
+    name: '姓 名',
+    headline: '',
+    photo: '',
+    pageSize: 'a4',
+    contacts: [
+      { text: '出生年月：2003.01', link: '' },
+      { text: '电话：138-0000-0000', link: '' },
+      { text: '政治面貌：共青团员', link: '' },
+      { text: '邮箱：your.email@example.com', link: '' },
+    ],
+    sections: [
+      section('table', '报考信息', {
+        text: [
+          '**报考院校：**XXXX大学　　　　**报考专业：**XXXX专业',
+          '初试成绩 | 政治 | 英语（一） | 数学（一） | 专业课 | 总分',
+          '分数 | 70 | 75 | 120 | 125 | **390**',
+        ].join('\n'),
+      }),
+      section('entries', '教育背景', {
+        entries: [
+          entry({
+            title: '示例大学', subtitle: '金融工程', date: '2021.09 ~ 2025.06',
+            bullets: '**GPA：**3.60/4.0　　**专业排名：**前 10%\n**主修课程：**数学分析、高等代数、概率论与数理统计、计量经济学、金融工程学等。',
+          }),
+        ],
+      }),
+      section('projects', '项目经历', {
+        entries: [
+          entry({
+            title: '基于 GARCH-VaR 模型的白酒行业风险度量与风险预测', subtitle: '毕业设计', date: '2024.10 ~ 2025.03',
+            bullets: [
+              '**数据建模：**基于 2020–2023 年白酒行业 8 只股票数据，完成数据清洗与对数收益率构建，运用 Matlab 和 Stata 构建 GARCH 和 EGARCH 模型，通过最大似然估计求解参数并优化模型。',
+              '**风险预测：**采用 VaR 方法在多置信水平下计算日度潜在损失，通过回测及 RMSE、MAE 指标验证模型，提出投资与风险预警建议。',
+            ].join('\n'),
+          }),
+          entry({
+            title: '基于优化算法的农作物种植策略研究（数学建模）', subtitle: '负责人', date: '2023.09',
+            bullets: '**模型构建：**构建以利润最大化为目标的多约束优化模型，采用遗传算法求解，得出 2024–2030 年最优种植策略。\n**优化分析：**引入鲁棒优化与双目标建模，与基准模型对比，收益提升 15%。',
+          }),
+        ],
+      }),
+      section('entries', '实习经历', {
+        entries: [
+          entry({
+            title: 'XX 银行 XX 支行', subtitle: '实习生', date: '2024.07 ~ 2024.08',
+            bullets: '**客户服务：**协助大堂经理进行客户分流与接待，日均接待客户 80 余人，提高了网点运营效率与客户满意度。\n**运营支持：**负责单据整理、资料归档及信息录入，日均处理 100 份单据，录入准确率 100%。',
+          }),
+        ],
+      }),
+      section('entries', '校园经历', {
+        entries: [
+          entry({ title: '2021 级金融工程 1 班', subtitle: '团支书', date: '2021.09 ~ 2022.09', bullets: '**组织管理：**组织政治理论学习、主题团日和团课活动 8 次，推进班级凝聚力建设。' }),
+          entry({ title: '校团委学生会', subtitle: '社团管理监督部干事', date: '2022.09 ~ 2023.09', bullets: '**活动管理：**跟进社团活动执行，监督流程与经费合规性；累计志愿服务时长 98 小时。' }),
+        ],
+      }),
+      section('skills', '技能证书', {
+        skills: [
+          { label: '专业证书', value: 'CET-4、CET-6（495 分）、计算机二级 MS Office、普通话二级乙等。' },
+          { label: '专业技能', value: 'Python、Matlab、SPSS；熟练使用 WPS、Office 等办公软件。' },
+          { label: '在校荣誉', value: '全国大学生数学建模竞赛省级一等奖、优秀学生奖学金一等奖、优秀共青团员。' },
+        ],
+      }),
+    ],
+  };
+}

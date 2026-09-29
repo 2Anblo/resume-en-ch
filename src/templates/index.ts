@@ -1,4 +1,5 @@
 import type { Lang, Resume, TemplateId } from '../types';
+import { renderFushi } from './fushi';
 import { renderJake } from './jake';
 import { renderNg } from './ng';
 import { renderZh } from './zh';
@@ -20,6 +21,7 @@ const MM = 96 / 25.4;
 export const TEMPLATES: Template[] = [
   { id: 'jake', name: { zh: "Jake's Resume", en: "Jake's Resume" }, langs: ['en'], render: renderJake, pad: [0.5 * 96, 0.45 * 96], photo: false, headline: false },
   { id: 'zh-simple', name: { zh: '简洁', en: 'Simple' }, langs: ['zh'], render: renderZh, pad: [16 * MM, 14 * MM], photo: true, headline: true },
+  { id: 'fushi', name: { zh: '考研复试', en: 'Postgraduate (考研)' }, langs: ['zh'], render: renderFushi, pad: [15 * MM, 15 * MM], photo: true, headline: false },
   { id: 'ng', name: { zh: 'Resume-NG', en: 'Resume-NG' }, langs: ['zh', 'en'], render: renderNg, pad: [10 * MM, 6 * MM], photo: true, headline: true },
 ];
 

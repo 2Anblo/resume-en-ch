@@ -1,4 +1,4 @@
-# Resume EN/中 · 中英文简历生成器
+# Resume EN/CH - 中英文简历生成器
 
 [English](#english) | 中文
 

@@ -99,3 +99,20 @@ describe('exam section', () => {
     expect(html).toContain('<strong>70</strong>');
   });
 });
+
+describe('ensureExam', () => {
+  it('adds 报考信息 on top for the postgraduate template, even for saved data', async () => {
+    const r = normalize({ ...sampleZh(), template: 'fushi' }, 'zh');
+    expect(r.sections[0]).toMatchObject({ kind: 'exam', title: '报考信息' });
+    expect(normalize(JSON.parse(JSON.stringify(r)), 'zh').sections.filter((s) => s.kind === 'exam')).toHaveLength(1);
+    expect(normalize(sampleZh(), 'zh').sections.some((s) => s.kind === 'exam')).toBe(false);
+  });
+  it('upgrades the earlier table version', () => {
+    const old = { ...sampleZh(), template: 'fushi', sections: [{ id: 'x', kind: 'table', title: '报考信息', entries: [], skills: [],
+      text: '**报考院校：**北京大学　　**报考专业：**计算机\n初试成绩 | 政治 | 英语（一） | 总分\n分数 | 70 | 75 | **145**' }] };
+    const s = normalize(old, 'zh').sections[0];
+    expect(s.kind).toBe('exam');
+    expect(s.entries[0]).toMatchObject({ title: '北京大学', subtitle: '计算机' });
+    expect(s.skills).toEqual([{ label: '政治', value: '70' }, { label: '英语（一）', value: '75' }]);
+  });
+});

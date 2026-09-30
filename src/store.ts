@@ -1,6 +1,6 @@
 import type { Lang, Resume, Section, SectionKind, TemplateId } from './types';
 import { templatesFor } from './templates';
-import { sampleEn, sampleFushi, sampleZh } from './samples';
+import { entry, examSection, sampleEn, sampleFushi, sampleZh, section } from './samples';
 import { uid } from './util';
 
 const KEY = (lang: Lang) => `resume-en-ch:${lang}`;
@@ -32,7 +32,7 @@ export function normalize(raw: unknown, fallbackLang: Lang): Resume {
     };
   });
   const photo = str(o.photo);
-  return {
+  return ensureExam({
     version: 1,
     lang,
     template: templatesFor(lang).some((t) => t.id === o.template) ? (o.template as TemplateId) : templatesFor(lang)[0].id,
@@ -45,7 +45,7 @@ export function normalize(raw: unknown, fallbackLang: Lang): Resume {
     }),
     sections,
     pageSize: o.pageSize === 'a4' || o.pageSize === 'letter' ? o.pageSize : lang === 'en' ? 'letter' : 'a4',
-  };
+  });
 }
 
 export function sample(lang: Lang, template?: TemplateId): Resume {
@@ -71,4 +71,26 @@ export function save(r: Resume): void {
   } catch {
     /* quota exceeded or storage blocked: editing still works for this session */
   }
+}
+
+/**
+ * The 考研复试 template always shows 报考信息 first. Adds the section when missing and upgrades
+ * the earlier "|"-table version (院校/专业 line + 初试成绩 rows) into the structured section.
+ */
+export function ensureExam(r: Resume): Resume {
+  if (r.template !== 'fushi' || r.sections.some((s) => s.kind === 'exam')) return r;
+  const i = r.sections.findIndex((s) => s.kind === 'table' && s.title.trim() === '报考信息');
+  if (i < 0) {
+    r.sections.unshift(section('exam', '报考信息', examSection()));
+    return r;
+  }
+  const old = r.sections[i];
+  const plain = (x: string) => x.replace(/\*\*/g, '').trim();
+  const text = plain(old.text);
+  const pick = (label: string) => new RegExp(`${label}[：:]\\s*([^\\s　|]+)`).exec(text)?.[1] ?? '';
+  const rows = old.text.split('\n').filter((l) => l.includes('|')).map((l) => l.split('|').map(plain));
+  const [head = [], vals = []] = rows;
+  const skills = head.slice(1).map((label, c) => ({ label, value: vals[c + 1] ?? '' })).filter((k) => k.label && !/^(总分|合计)$/.test(k.label));
+  r.sections[i] = { ...old, kind: 'exam', text: '', entries: [entry({ title: pick('报考院校'), subtitle: pick('报考专业'), location: pick('研究方向') })], skills };
+  return r;
 }

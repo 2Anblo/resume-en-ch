@@ -1,5 +1,5 @@
 import type { Entry, Resume, Section } from '../types';
-import { contactHref, esc, inline, lines, tableHtml } from '../util';
+import { contactHref, esc, inline, lines, tableHtml, examHtml } from '../util';
 
 /** HTML take on Resume-NG by Feng Kaiyu (https://github.com/fky2015/resume-ng, LPPL 1.3c). */
 export function renderNg(r: Resume): string {
@@ -33,6 +33,7 @@ function renderSection(s: Section): string {
       .map((k) => `<li>${k.label.trim() ? `<strong>${inline(k.label)}</strong>: ` : ''}${inline(k.value)}</li>`)
       .join('')}</ul>`;
   else if (s.kind === 'table') body = tableHtml(s.text);
+  else if (s.kind === 'exam') body = examHtml(s);
   else body = `<ul>${lines(s.text).map((l) => `<li>${inline(l)}</li>`).join('')}</ul>`;
   return `<section><h2>${esc(s.title)}</h2>${body}</section>`;
 }

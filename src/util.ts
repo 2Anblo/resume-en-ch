@@ -77,3 +77,30 @@ export function tableHtml(text: string): string {
   flush();
   return out.join('');
 }
+
+/** Subjects plus a 总分 column, computed when every score is a number and no total was entered. */
+export function examScores(skills: { label: string; value: string }[]): { label: string; value: string; total?: boolean }[] {
+  const rows = skills.filter((k) => k.label.trim() || k.value.trim()).map((k) => ({ ...k, total: /^(总分|合计|total)$/i.test(k.label.trim()) }));
+  if (rows.length && !rows.some((r) => r.total) && rows.every((r) => /^\d+(\.\d+)?$/.test(r.value.trim()))) {
+    const sum = rows.reduce((a, r) => a + Number(r.value), 0);
+    rows.push({ label: '总分', value: String(Math.round(sum * 10) / 10), total: true });
+  }
+  return rows;
+}
+
+/** 报考信息: a 院校 / 专业 / 方向 line and a 初试成绩 table. */
+export function examHtml(s: { entries: { title: string; subtitle: string; location: string }[]; skills: { label: string; value: string }[] }): string {
+  const e = s.entries[0] ?? { title: '', subtitle: '', location: '' };
+  const facts = [['报考院校', e.title], ['报考专业', e.subtitle], ['研究方向', e.location]]
+    .filter(([, v]) => v.trim())
+    .map(([k, v]) => `<span><strong>${k}：</strong>${inline(v)}</span>`)
+    .join('');
+  const rows = examScores(s.skills);
+  const table = rows.length
+    ? `<table class="tbl exam"><tbody>
+  <tr><th rowspan="2" class="exam-label">初试成绩</th>${rows.map((r) => `<td>${inline(r.label)}</td>`).join('')}</tr>
+  <tr>${rows.map((r) => `<td>${r.total ? `<strong>${inline(r.value)}</strong>` : inline(r.value)}</td>`).join('')}</tr>
+</tbody></table>`
+    : '';
+  return `${facts ? `<div class="exam-facts">${facts}</div>` : ''}${table}`;
+}

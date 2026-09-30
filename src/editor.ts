@@ -1,10 +1,10 @@
 import type { Dict } from './i18n';
 import type { Resume, Section, SectionKind } from './types';
-import { entry, section } from './samples';
+import { entry, examSection, section } from './samples';
 import { esc } from './util';
 import { templateOf } from './templates';
 
-const KINDS: SectionKind[] = ['entries', 'projects', 'skills', 'text', 'table'];
+const KINDS: SectionKind[] = ['exam', 'entries', 'projects', 'skills', 'text', 'table'];
 
 function field(label: string, path: string, value: string, opts: { area?: boolean; rows?: number; wide?: boolean } = {}): string {
   const control = opts.area
@@ -81,6 +81,24 @@ function renderSection(s: Section, si: number, n: number, d: Dict, collapsed: Se
     </div>`,
         )
         .join('') + `<button type="button" class="btn small ghost" data-action="addEntry" data-args="${si}">+ ${d.addEntry}</button>`;
+  } else if (s.kind === 'exam') {
+    if (!s.entries.length) s.entries.push(entry());
+    const e = s.entries[0];
+    body =
+      `<div class="grid">
+        ${field(d.examSchool, `${p}.entries.0.title`, e.title)}
+        ${field(d.examMajor, `${p}.entries.0.subtitle`, e.subtitle)}
+        ${field(d.examDirection, `${p}.entries.0.location`, e.location, { wide: true })}
+      </div><h4>${d.examScores}</h4>` +
+      s.skills
+        .map(
+          (k, ki) => `<div class="row-fields">
+        ${field(d.examSubject, `${p}.skills.${ki}.label`, k.label)}
+        ${field(d.examScore, `${p}.skills.${ki}.value`, k.value)}
+        <div class="row-actions">${moveBtns('moveSkill', `${si}|${ki}`, ki, s.skills.length, d)}${iconBtn('removeSkill', `${si}|${ki}`, d.remove, '✕', true)}</div>
+      </div>`,
+        )
+        .join('') + `<button type="button" class="btn small ghost" data-action="addSkill" data-args="${si}">+ ${d.examAddSubject}</button>`;
   } else if (s.kind === 'skills') {
     body =
       s.skills
@@ -128,6 +146,7 @@ export function applyAction(r: Resume, action: string, args: string): boolean {
       const s = section(kind, '');
       if (kind === 'entries' || kind === 'projects') s.entries.push(entry());
       if (kind === 'skills') s.skills.push({ label: '', value: '' });
+      if (kind === 'exam') Object.assign(s, examSection());
       r.sections.push(s);
       break;
     }

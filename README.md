@@ -7,7 +7,7 @@
 - **英文模板**：复刻 Overleaf 上最经典的 [Jake's Resume](https://github.com/jakegut/resume)（Computer Modern 字体、小型大写标题、横线分隔）
 - **中文模板（简洁）**：简洁整洁的单栏布局，内置思源黑体（Noto Sans SC），可选证件照
 - **Resume-NG 模板**：参考 [fky2015/resume-ng](https://github.com/fky2015/resume-ng) 的高信息密度排版（黑体标题、宋体正文、楷体补充信息），中英文简历都可用
-- **考研复试模板**：参考 [kody1126/Chinese-resume-template-postgraduate](https://github.com/kody1126/Chinese-resume-template-postgraduate)，蓝色标题、个人信息栏、证件照和初试成绩表格
+- **考研复试模板**：参考 [kody1126/Chinese-resume-template-postgraduate](https://github.com/kody1126/Chinese-resume-template-postgraduate)，蓝色标题、个人信息栏、证件照，以及置顶的「报考信息」模块（报考院校、专业、研究方向和初试成绩表，总分自动计算）。切换到该模板时如果还没有报考信息，会自动在最前面加上
 - 在顶部「模板」下拉框里随时切换模板，内容不变；「恢复示例」会载入当前模板的示例
 - 「表格」模块：每行一行，单元格用 `|` 分隔，适合放初试成绩等
 - **导出 PDF**：使用浏览器打印生成矢量 PDF，文字可选中、可被 ATS 解析

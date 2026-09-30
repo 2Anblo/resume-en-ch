@@ -86,3 +86,16 @@ describe('tables and labels', () => {
     for (const t of templatesFor('zh')) expect(t.render(sampleFushi())).toContain('初试成绩');
   });
 });
+
+describe('exam section', () => {
+  it('computes the total and renders school, major and scores', async () => {
+    const { examHtml, examScores } = await import('../src/util');
+    expect(examScores([{ label: '政治', value: '70' }, { label: '英语', value: '75.5' }]).at(-1)).toMatchObject({ label: '总分', value: '145.5' });
+    expect(examScores([{ label: '政治', value: '70' }, { label: '总分', value: '400' }])).toHaveLength(2);
+    const html = examHtml({ entries: [{ title: '北大', subtitle: '计算机', location: '' }], skills: [{ label: '政治', value: '70' }] });
+    expect(html).toContain('报考院校');
+    expect(html).toContain('计算机');
+    expect(html).not.toContain('研究方向');
+    expect(html).toContain('<strong>70</strong>');
+  });
+});

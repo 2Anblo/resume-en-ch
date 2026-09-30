@@ -28,8 +28,9 @@ export interface SkillLine {
  * skills: "Label: value" lines
  * text: free paragraph
  * table: `text` holds rows, cells separated by "|"; the first row is the header
+ * exam: 报考信息 — entries[0] holds 院校 (title), 专业 (subtitle), 研究方向 (location); skills hold 科目/分数
  */
-export type SectionKind = 'entries' | 'projects' | 'skills' | 'text' | 'table';
+export type SectionKind = 'entries' | 'projects' | 'skills' | 'text' | 'table' | 'exam';
 
 export interface Section {
   id: string;

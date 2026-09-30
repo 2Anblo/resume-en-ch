@@ -157,6 +157,19 @@ export function sampleZh(): Resume {
   };
 }
 
+/** A filled-in 报考信息 section (院校 / 专业 / 初试成绩). */
+export function examSection(): Pick<Section, 'entries' | 'skills'> {
+  return {
+    entries: [entry({ title: 'XXXX大学', subtitle: 'XXXX专业' })],
+    skills: [
+      { label: '政治', value: '70' },
+      { label: '英语（一）', value: '75' },
+      { label: '数学（一）', value: '120' },
+      { label: '专业课', value: '125' },
+    ],
+  };
+}
+
 /** Content adapted from the sample in Kody's 中文考研复试简历模板 (MIT). */
 export function sampleFushi(): Resume {
   return {
@@ -174,13 +187,7 @@ export function sampleFushi(): Resume {
       { text: '邮箱：your.email@example.com', link: '' },
     ],
     sections: [
-      section('table', '报考信息', {
-        text: [
-          '**报考院校：**XXXX大学　　　　**报考专业：**XXXX专业',
-          '初试成绩 | 政治 | 英语（一） | 数学（一） | 专业课 | 总分',
-          '分数 | 70 | 75 | 120 | 125 | **390**',
-        ].join('\n'),
-      }),
+      section('exam', '报考信息', examSection()),
       section('entries', '教育背景', {
         entries: [
           entry({

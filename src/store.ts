@@ -6,7 +6,7 @@ import { uid } from './util';
 const KEY = (lang: Lang) => `resume-en-ch:${lang}`;
 const str = (v: unknown): string => (typeof v === 'string' ? v : v == null ? '' : String(v));
 const arr = (v: unknown): unknown[] => (Array.isArray(v) ? v : []);
-const KINDS: SectionKind[] = ['entries', 'projects', 'skills', 'text', 'table'];
+const KINDS: SectionKind[] = ['entries', 'projects', 'skills', 'text', 'table', 'exam'];
 
 /** Coerces untrusted JSON (import / localStorage) into a well-formed Resume. */
 export function normalize(raw: unknown, fallbackLang: Lang): Resume {

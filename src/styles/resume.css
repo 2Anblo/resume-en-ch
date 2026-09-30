@@ -148,6 +148,12 @@
 .page table.tbl th:first-child, .page table.tbl td:first-child { font-weight: 700; }
 .page .tbl-note { margin: 2pt 0; }
 
+/* 报考信息 (any template) */
+.page .exam-facts { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0 2em; margin: 1pt 0 2pt; }
+.page table.tbl.exam td { width: auto; }
+.page table.tbl.exam th.exam-label { font-weight: 700; white-space: nowrap; padding: 2pt 8pt; }
+.page table.tbl.exam td:first-child { font-weight: inherit; }
+
 /* ---------- 考研复试 ---------- */
 .fushi {
   --blue: rgb(46, 116, 181);
@@ -160,7 +166,7 @@
   color: #000;
   padding: 15mm;
 }
-.fushi strong, .fushi h1, .fushi h2, .fushi .k, .fushi th:first-child, .fushi td:first-child { font-family: var(--bold); font-weight: 700; }
+.fushi strong, .fushi h1, .fushi h2, .fushi .k, .fushi th:first-child, .fushi td:first-child, .fushi th.exam-label { font-family: var(--bold); font-weight: 700; }
 .fushi a { color: var(--link); }
 .fushi .heading { display: flex; align-items: flex-start; gap: 8mm; margin: -3mm 0 2mm; }
 .fushi .who { flex: 1; text-align: center; }
@@ -179,3 +185,5 @@
 .fushi table.tbl { margin: 1.5mm 0 1mm; }
 .fushi table.tbl th, .fushi table.tbl td { border-color: #555; }
 .fushi table.tbl { table-layout: fixed; }
+.fushi table.tbl.exam td:first-child { font-family: var(--serif); font-weight: 400; }
+.fushi .exam-facts { font-size: 11.5pt; }

@@ -12,6 +12,7 @@ import './styles/resume.css';
 import { applyAction, renderEditor, setPath } from './editor';
 import { t, type UiLang } from './i18n';
 import { load, normalize, sample, save } from './store';
+import { examSection, section } from './samples';
 import { templateOf, templatesFor } from './templates';
 import type { Lang, PageSize, Resume, TemplateId } from './types';
 
@@ -185,7 +186,10 @@ $<HTMLSelectElement>('#page-size').addEventListener('change', (e) => {
 });
 
 $<HTMLSelectElement>('#template').addEventListener('change', (e) => {
-  cur().template = (e.target as HTMLSelectElement).value as TemplateId;
+  const r = cur();
+  r.template = (e.target as HTMLSelectElement).value as TemplateId;
+  // 报考信息 is the heart of the 考研复试 template: add it on top if the resume has none.
+  if (r.template === 'fushi' && !r.sections.some((s) => s.kind === 'exam' || s.title.trim() === '报考信息')) r.sections.unshift(section('exam', '报考信息', examSection()));
   changed(true);
 });
 

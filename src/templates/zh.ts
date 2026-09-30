@@ -1,5 +1,5 @@
 import type { Entry, Resume, Section } from '../types';
-import { contactHref, esc, inline, lines, tableHtml } from '../util';
+import { contactHref, esc, inline, lines, tableHtml, examHtml } from '../util';
 
 export function renderZh(r: Resume): string {
   const contacts = r.contacts
@@ -34,6 +34,7 @@ function renderSection(s: Section): string {
       .map((k) => `<li>${k.label.trim() ? `<strong>${inline(k.label)}：</strong>` : ''}${inline(k.value)}</li>`)
       .join('')}</ul>`;
   else if (s.kind === 'table') body = tableHtml(s.text);
+  else if (s.kind === 'exam') body = examHtml(s);
   else body = lines(s.text).map((l) => `<p>${inline(l)}</p>`).join('');
   return `<section><h2><span>${esc(s.title)}</span></h2>${body}</section>`;
 }

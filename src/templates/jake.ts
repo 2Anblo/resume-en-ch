@@ -1,5 +1,5 @@
 import type { Entry, Resume, Section } from '../types';
-import { contactHref, esc, inline, lines, tableHtml } from '../util';
+import { contactHref, esc, inline, lines, tableHtml, examHtml } from '../util';
 
 /** HTML port of Jake's Resume (https://github.com/jakegut/resume, MIT). */
 export function renderJake(r: Resume): string {
@@ -31,6 +31,7 @@ function renderSection(s: Section): string {
       .map((k) => `<div><strong>${inline(k.label)}</strong>${k.label.trim() ? ': ' : ''}${inline(k.value)}</div>`)
       .join('')}</li></ul>`;
   else if (s.kind === 'table') body = `<ul class="subheadings skills"><li>${tableHtml(s.text)}</li></ul>`;
+  else if (s.kind === 'exam') body = `<ul class="subheadings skills"><li>${examHtml(s)}</li></ul>`;
   else body = `<ul class="subheadings skills"><li>${lines(s.text).map((l) => `<p>${inline(l)}</p>`).join('')}</li></ul>`;
   return `<section><h2>${esc(s.title)}</h2>${body}</section>`;
 }

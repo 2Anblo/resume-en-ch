@@ -1,5 +1,5 @@
 import type { Entry, Resume, Section } from '../types';
-import { contactHref, esc, inline, lines, splitLabel, tableHtml } from '../util';
+import { contactHref, esc, inline, lines, splitLabel, tableHtml, examHtml } from '../util';
 
 /** HTML take on Kody's 中文考研复试简历模板 (https://github.com/kody1126/Chinese-resume-template-postgraduate, MIT). */
 export function renderFushi(r: Resume): string {
@@ -40,6 +40,7 @@ function renderSection(s: Section): string {
       .map((k) => `<p class="b">• ${k.label.trim() ? `<strong>${inline(k.label)}：</strong>` : ''}${inline(k.value)}</p>`)
       .join('');
   else if (s.kind === 'table') body = tableHtml(s.text);
+  else if (s.kind === 'exam') body = examHtml(s);
   else body = bullets(s.text);
   return `<section><h2>${esc(s.title)}</h2>${body}</section>`;
 }

@@ -11,6 +11,7 @@ import './styles/resume.css';
 
 import { applyAction, renderEditor, setPath } from './editor';
 import { t, type UiLang } from './i18n';
+import { toLatex } from './latex';
 import { ensureExam, load, normalize, sample, save } from './store';
 import { templateOf, templatesFor } from './templates';
 import type { Lang, PageSize, Resume, TemplateId } from './types';
@@ -314,14 +315,18 @@ function fileName(ext: string) {
   return `${base}_${lang === 'en' ? 'Resume' : '简历'}.${ext}`;
 }
 
-$('#export').addEventListener('click', () => {
-  const blob = new Blob([JSON.stringify(cur(), null, 2)], { type: 'application/json' });
+function downloadText(text: string, type: string, name: string) {
+  const blob = new Blob([text], { type });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = fileName('json');
+  a.download = name;
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-});
+}
+
+$('#export').addEventListener('click', () => downloadText(JSON.stringify(cur(), null, 2), 'application/json', fileName('json')));
+
+$('#export-tex').addEventListener('click', () => downloadText(toLatex(cur()), 'application/x-tex', fileName('tex')));
 
 $<HTMLInputElement>('#import-file').addEventListener('change', async (e) => {
   const input = e.target as HTMLInputElement;

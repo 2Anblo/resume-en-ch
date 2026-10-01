@@ -4,7 +4,8 @@ const dict = {
   zh: {
     tplEn: '英文简历', tplEnHint: "Jake's Resume（Overleaf 经典模板）",
     tplZh: '中文简历', tplZhHint: '简洁中文模板',
-    download: '下载 PDF', importJson: '导入 JSON', exportJson: '导出 JSON', reset: '恢复示例',
+    download: '下载 PDF', importJson: '导入 JSON', exportJson: '导出 JSON', exportTex: '导出 LaTeX',
+    exportTexHint: '下载 .tex 源文件，可在 Overleaf 等编辑器中继续修改。英文用 pdfLaTeX 编译，中文请用 XeLaTeX。', reset: '恢复示例',
     resetConfirm: '恢复为示例内容？当前模板的编辑内容会被覆盖（建议先导出 JSON 备份）。',
     importError: '无法读取该文件，请确认是本工具导出的 JSON。',
     pageSize: '纸张', template: '模板', basics: '基本信息', name: '姓名', headline: '求职意向 / 一句话介绍',
@@ -24,7 +25,8 @@ const dict = {
   en: {
     tplEn: 'English', tplEnHint: "Jake's Resume (classic Overleaf template)",
     tplZh: 'Chinese', tplZhHint: 'Clean Chinese template',
-    download: 'Download PDF', importJson: 'Import JSON', exportJson: 'Export JSON', reset: 'Reset sample',
+    download: 'Download PDF', importJson: 'Import JSON', exportJson: 'Export JSON', exportTex: 'Export LaTeX',
+    exportTexHint: 'Download the .tex source to keep editing in Overleaf or any LaTeX editor. English compiles with pdfLaTeX, Chinese with XeLaTeX.', reset: 'Reset sample',
     resetConfirm: 'Reset to the sample? Your edits to this template will be replaced (export JSON first to keep a backup).',
     importError: 'Could not read this file. Is it a JSON exported from this app?',
     pageSize: 'Paper', template: 'Template', basics: 'Basics', name: 'Name', headline: 'Headline / target role',

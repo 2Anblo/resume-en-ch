@@ -12,6 +12,7 @@
 - 「表格」模块：每行一行，单元格用 `|` 分隔，适合放初试成绩等
 - **导出 PDF**：使用浏览器打印生成矢量 PDF，文字可选中、可被 ATS 解析
 - **导入 / 导出 JSON**：方便备份和版本管理；自动保存到 localStorage
+- **导出 LaTeX**：下载 .tex 源文件，可在 Overleaf 等编辑器里继续修改。英文导出为 Jake's Resume 格式（pdfLaTeX 编译）；中文导出为基于 ctex 的版式（需用 XeLaTeX 编译）
 - 自由增删、排序模块和条目，支持 `**加粗**` 与 `[文字](链接)`
 - 支持 Letter / A4 纸张，预览中用红色虚线标出分页位置
 
@@ -59,6 +60,7 @@ src/
   templates/index.ts  模板注册表（名称、适用语言、页边距）
   styles/resume.css   两套模板的排版样式
   editor.ts           左侧表单编辑器
+  latex.ts            导出 LaTeX（.tex）
   store.ts            本地存储与 JSON 导入校验
   samples.ts          示例数据
 ```
@@ -85,6 +87,7 @@ An open-source, client-side resume generator for English and Chinese resumes. Ed
 - **Postgraduate (考研复试) template**: modeled on [kody1126/Chinese-resume-template-postgraduate](https://github.com/kody1126/Chinese-resume-template-postgraduate), with an info grid, photo and an exam-score table (new *Table* section type)
 - **PDF export** through the browser's print engine: vector output, selectable, ATS-friendly text
 - JSON import/export and automatic saving to localStorage
+- **LaTeX export**: download a .tex file to keep editing in Overleaf. English resumes export as Jake's Resume (pdfLaTeX); Chinese resumes as a ctex document (XeLaTeX)
 - Add, remove and reorder sections and entries; `**bold**` and `[text](url)` in bullets
 - Letter / A4, with page-break guides in the preview
 

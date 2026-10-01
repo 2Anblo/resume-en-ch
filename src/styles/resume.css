@@ -67,7 +67,10 @@
 /* ---------- 简洁中文模板 ---------- */
 .zh {
   --accent: #1f4e79;
-  font-family: 'Noto Sans SC', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Source Han Sans SC', sans-serif;
+  --serif: 'Noto Serif SC', 'Source Han Serif SC', 'Songti SC', 'STSong', 'SimSun', serif;
+  --sans: 'Noto Sans SC', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Source Han Sans SC', sans-serif;
+  /* 正文宋体、标题黑体，接近 LaTeX (ctex) 导出的效果 */
+  font-family: var(--serif);
   font-size: 10pt;
   line-height: 1.6;
   color: #222;
@@ -101,6 +104,7 @@
 .zh .skills li strong { color: #111; }
 .zh p { margin: 0; text-indent: 0; }
 .zh strong { font-weight: 700; }
+.zh h1, .zh h2, .zh strong { font-family: var(--sans); }
 
 /* ---------- Resume-NG ---------- */
 .ng {

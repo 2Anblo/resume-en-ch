@@ -84,8 +84,28 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .card-title { font-weight: 600; }
 .grip { color: var(--muted); cursor: grab; font-size: 15px; line-height: 1; margin-left: -2px; user-select: none; }
 summary.drag-zone { touch-action: none; user-select: none; }
-.card.dragging { opacity: 0.9; box-shadow: 0 8px 24px rgb(0 0 0 / 0.22); border-color: var(--accent); position: relative; z-index: 2; }
-.editor.is-dragging, .editor.is-dragging * { cursor: grabbing !important; }
+.editor { position: relative; }
+.card { transition: opacity 0.15s, filter 0.15s, transform 0.15s; }
+.card.dragging { opacity: 0.35; filter: blur(1.5px) grayscale(0.4); transform: scale(0.985); }
+.editor.is-dragging, .editor.is-dragging * { cursor: grabbing !important; user-select: none; }
+.drag-ghost {
+  position: fixed; z-index: 50; pointer-events: none; display: flex; align-items: center; gap: 8px;
+  padding: 11px 14px; background: var(--panel); border: 1px solid var(--accent); border-radius: 10px;
+  box-shadow: 0 12px 28px rgb(0 0 0 / 0.25); transform: translateX(10px) rotate(-1deg) scale(1.02); opacity: 0.88;
+}
+.drag-ghost .card-title { font-weight: 600; }
+.drop-line {
+  position: absolute; left: 16px; right: 16px; height: 3px; margin-top: -1.5px; border-radius: 2px;
+  background: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+  pointer-events: none; transition: top 0.12s ease; z-index: 60;
+}
+.drop-line::before, .drop-line::after { content: ''; position: absolute; top: -3.5px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); }
+.drop-line::before { left: -5px; }
+.drop-line::after { right: -5px; }
+.drop-line.noop { opacity: 0; }
+.card.just-dropped { animation: dropped 0.7s ease; }
+@keyframes dropped { 0% { box-shadow: 0 0 0 3px var(--accent); } 100% { box-shadow: 0 0 0 0 transparent; } }
+@media (prefers-reduced-motion: reduce) { .card, .drop-line { transition: none; } .card.just-dropped { animation: none; } }
 .kind { font-size: 12px; color: var(--muted); background: var(--bg); border-radius: 4px; padding: 0 6px; }
 .card summary .row-actions { margin-left: auto; }
 .card h4 { margin: 12px 0 6px; font-size: 13px; color: var(--muted); font-weight: 600; }

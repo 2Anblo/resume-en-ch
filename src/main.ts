@@ -146,60 +146,104 @@ editor.addEventListener('change', (e) => {
 });
 
 /* ---------- drag to reorder sections ---------- */
-// Pointer events (not HTML5 drag and drop) so it also works with touch.
-let drag: { card: HTMLElement; startY: number; active: boolean; id: number } | null = null;
+// Pointer events (not HTML5 drag and drop) so it also works with touch. While dragging, the card stays
+// in place (faded), a ghost of its header follows the pointer and a line marks where it will land.
+interface Drag {
+  card: HTMLElement;
+  id: number;
+  startY: number;
+  offsetY: number;
+  active: boolean;
+  ghost?: HTMLElement;
+  line?: HTMLElement;
+  /** Index among section cards (excluding the dragged one) to insert before. */
+  target: number;
+}
+let drag: Drag | null = null;
 let suppressClick = false;
+
+const sectionCards = () => [...editor.querySelectorAll<HTMLElement>('details[data-section]')];
 
 editor.addEventListener('pointerdown', (e) => {
   const zone = (e.target as HTMLElement).closest<HTMLElement>('summary.drag-zone');
   if (!zone || e.button !== 0 || (e.target as HTMLElement).closest('button')) return;
-  drag = { card: zone.parentElement as HTMLElement, startY: e.clientY, active: false, id: e.pointerId };
+  const card = zone.parentElement as HTMLElement;
+  drag = { card, id: e.pointerId, startY: e.clientY, offsetY: e.clientY - zone.getBoundingClientRect().top, active: false, target: -1 };
 });
 
+function startDrag(e: PointerEvent, d: Drag) {
+  d.active = true;
+  const summary = d.card.querySelector('summary') as HTMLElement;
+  summary.setPointerCapture(e.pointerId);
+  const rect = summary.getBoundingClientRect();
+  const ghost = document.createElement('div');
+  ghost.className = 'drag-ghost';
+  ghost.style.width = `${d.card.getBoundingClientRect().width}px`;
+  ghost.innerHTML = summary.innerHTML;
+  ghost.querySelector('.row-actions')?.remove();
+  ghost.style.left = `${rect.left}px`;
+  document.body.appendChild(ghost);
+  const line = document.createElement('div');
+  line.className = 'drop-line';
+  editor.appendChild(line);
+  d.ghost = ghost;
+  d.line = line;
+  d.card.classList.add('dragging');
+  editor.classList.add('is-dragging');
+}
+
 editor.addEventListener('pointermove', (e) => {
-  if (!drag || e.pointerId !== drag.id) return;
-  if (!drag.active) {
-    if (Math.abs(e.clientY - drag.startY) < 6) return;
-    drag.active = true;
-    drag.card.classList.add('dragging');
-    editor.classList.add('is-dragging');
-    (drag.card.querySelector('summary') as HTMLElement).setPointerCapture(e.pointerId);
+  const d = drag;
+  if (!d || e.pointerId !== d.id) return;
+  if (!d.active) {
+    if (Math.abs(e.clientY - d.startY) < 6) return;
+    startDrag(e, d);
   }
   e.preventDefault();
-  const cards = [...editor.querySelectorAll<HTMLElement>('details[data-section]')].filter((c) => c !== drag!.card);
-  const before = cards.find((c) => {
+  d.ghost!.style.top = `${e.clientY - d.offsetY}px`;
+
+  const others = sectionCards().filter((c) => c !== d.card);
+  let target = others.findIndex((c) => {
     const r = c.getBoundingClientRect();
     return e.clientY < r.top + r.height / 2;
   });
-  const parent = drag.card.parentElement!;
-  if (before) {
-    if (drag.card.nextElementSibling !== before) parent.insertBefore(drag.card, before);
-  } else {
-    const last = cards[cards.length - 1];
-    if (last && last.nextElementSibling !== drag.card) last.after(drag.card);
-  }
-  // Scroll the panel when dragging near its edges.
+  if (target < 0) target = others.length;
+  d.target = target;
+
+  // Place the line in the gap before `others[target]` (or after the last card).
   const box = editor.getBoundingClientRect();
+  const gap = 6;
+  const y =
+    target < others.length
+      ? others[target].getBoundingClientRect().top - gap
+      : (others[others.length - 1] ?? d.card).getBoundingClientRect().bottom + gap;
+  d.line!.style.top = `${y - box.top + editor.scrollTop}px`;
+  // Hide the line when dropping would not change anything.
+  const from = sectionCards().indexOf(d.card);
+  d.line!.classList.toggle('noop', target === from);
+
   if (e.clientY < box.top + 40) editor.scrollTop -= 12;
   else if (e.clientY > box.bottom - 40) editor.scrollTop += 12;
 });
 
 function endDrag() {
-  if (!drag) return;
-  if (drag.active) {
-    drag.card.classList.remove('dragging');
-    editor.classList.remove('is-dragging');
-    suppressClick = true; // the pointerup is followed by a click on <summary>; don't toggle the card
-    const order = [...editor.querySelectorAll<HTMLElement>('details[data-section]')].map((c) => c.dataset.section);
-    const r = cur();
-    const byId = new Map(r.sections.map((s) => [s.id, s]));
-    const next = order.map((id) => byId.get(id!)!).filter(Boolean);
-    if (next.length === r.sections.length && next.some((s, i) => s !== r.sections[i])) {
-      r.sections = next;
-      changed(true);
-    }
-  }
+  const d = drag;
   drag = null;
+  if (!d?.active) return;
+  d.ghost?.remove();
+  d.line?.remove();
+  d.card.classList.remove('dragging');
+  editor.classList.remove('is-dragging');
+  suppressClick = true; // the pointerup is followed by a click on <summary>; don't toggle the card
+  const r = cur();
+  const from = r.sections.findIndex((s) => s.id === d.card.dataset.section);
+  if (from < 0 || d.target < 0 || d.target === from) return;
+  const [moved] = r.sections.splice(from, 1);
+  r.sections.splice(d.target, 0, moved);
+  changed(true);
+  const card = editor.querySelector<HTMLElement>(`details[data-section="${moved.id}"]`);
+  card?.classList.add('just-dropped');
+  setTimeout(() => card?.classList.remove('just-dropped'), 700);
 }
 editor.addEventListener('pointerup', endDrag);
 editor.addEventListener('pointercancel', endDrag);

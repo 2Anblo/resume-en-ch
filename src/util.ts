@@ -14,14 +14,19 @@ export function inline(s: string): string {
     });
 }
 
-/** Only allow http(s), mailto and tel links; bare domains get https://. */
-export function safeUrl(url: string): string {
+/** Only allow http(s), mailto and tel links; bare domains get https://. Returns the URL unescaped. */
+export function cleanUrl(url: string): string {
   const u = String(url ?? '').trim();
   if (!u) return '';
-  if (/^(https?:|mailto:|tel:)/i.test(u)) return esc(u);
+  if (/^(https?:|mailto:|tel:)/i.test(u)) return u;
   if (/^[a-z][a-z0-9+.-]*:/i.test(u)) return '';
-  if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(u)) return esc('mailto:' + u);
-  return esc('https://' + u);
+  if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(u)) return 'mailto:' + u;
+  return 'https://' + u;
+}
+
+/** cleanUrl, HTML-escaped. */
+export function safeUrl(url: string): string {
+  return esc(cleanUrl(url));
 }
 
 export function lines(s: string): string[] {
@@ -37,10 +42,15 @@ export function uid(): string {
 
 /** Link for a contact: the explicit link, else the text itself when it looks like an email or URL. */
 export function contactHref(c: { text: string; link: string }): string {
-  const explicit = safeUrl(c.link);
+  return esc(contactUrl(c));
+}
+
+/** contactHref, unescaped. */
+export function contactUrl(c: { text: string; link: string }): string {
+  const explicit = cleanUrl(c.link);
   if (explicit) return explicit;
   const t = splitLabel(c.text)[1].trim();
-  if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(t) || /^(https?:\/\/|www\.)\S+$/i.test(t) || /^[\w-]+(\.[\w-]+)+\/\S*$/.test(t)) return safeUrl(t);
+  if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(t) || /^(https?:\/\/|www\.)\S+$/i.test(t) || /^[\w-]+(\.[\w-]+)+\/\S*$/.test(t)) return cleanUrl(t);
   return '';
 }
 

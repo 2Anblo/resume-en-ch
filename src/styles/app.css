@@ -82,6 +82,10 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .card summary::before { content: '▸'; color: var(--muted); transition: transform 0.15s; }
 .card[open] summary::before { transform: rotate(90deg); }
 .card-title { font-weight: 600; }
+.grip { color: var(--muted); cursor: grab; font-size: 15px; line-height: 1; margin-left: -2px; user-select: none; }
+summary.drag-zone { touch-action: none; user-select: none; }
+.card.dragging { opacity: 0.9; box-shadow: 0 8px 24px rgb(0 0 0 / 0.22); border-color: var(--accent); position: relative; z-index: 2; }
+.editor.is-dragging, .editor.is-dragging * { cursor: grabbing !important; }
 .kind { font-size: 12px; color: var(--muted); background: var(--bg); border-radius: 4px; padding: 0 6px; }
 .card summary .row-actions { margin-left: auto; }
 .card h4 { margin: 12px 0 6px; font-size: 13px; color: var(--muted); font-weight: 600; }

@@ -145,7 +145,73 @@ editor.addEventListener('change', (e) => {
   img.src = URL.createObjectURL(file);
 });
 
+/* ---------- drag to reorder sections ---------- */
+// Pointer events (not HTML5 drag and drop) so it also works with touch.
+let drag: { card: HTMLElement; startY: number; active: boolean; id: number } | null = null;
+let suppressClick = false;
+
+editor.addEventListener('pointerdown', (e) => {
+  const zone = (e.target as HTMLElement).closest<HTMLElement>('summary.drag-zone');
+  if (!zone || e.button !== 0 || (e.target as HTMLElement).closest('button')) return;
+  drag = { card: zone.parentElement as HTMLElement, startY: e.clientY, active: false, id: e.pointerId };
+});
+
+editor.addEventListener('pointermove', (e) => {
+  if (!drag || e.pointerId !== drag.id) return;
+  if (!drag.active) {
+    if (Math.abs(e.clientY - drag.startY) < 6) return;
+    drag.active = true;
+    drag.card.classList.add('dragging');
+    editor.classList.add('is-dragging');
+    (drag.card.querySelector('summary') as HTMLElement).setPointerCapture(e.pointerId);
+  }
+  e.preventDefault();
+  const cards = [...editor.querySelectorAll<HTMLElement>('details[data-section]')].filter((c) => c !== drag!.card);
+  const before = cards.find((c) => {
+    const r = c.getBoundingClientRect();
+    return e.clientY < r.top + r.height / 2;
+  });
+  const parent = drag.card.parentElement!;
+  if (before) {
+    if (drag.card.nextElementSibling !== before) parent.insertBefore(drag.card, before);
+  } else {
+    const last = cards[cards.length - 1];
+    if (last && last.nextElementSibling !== drag.card) last.after(drag.card);
+  }
+  // Scroll the panel when dragging near its edges.
+  const box = editor.getBoundingClientRect();
+  if (e.clientY < box.top + 40) editor.scrollTop -= 12;
+  else if (e.clientY > box.bottom - 40) editor.scrollTop += 12;
+});
+
+function endDrag() {
+  if (!drag) return;
+  if (drag.active) {
+    drag.card.classList.remove('dragging');
+    editor.classList.remove('is-dragging');
+    suppressClick = true; // the pointerup is followed by a click on <summary>; don't toggle the card
+    const order = [...editor.querySelectorAll<HTMLElement>('details[data-section]')].map((c) => c.dataset.section);
+    const r = cur();
+    const byId = new Map(r.sections.map((s) => [s.id, s]));
+    const next = order.map((id) => byId.get(id!)!).filter(Boolean);
+    if (next.length === r.sections.length && next.some((s, i) => s !== r.sections[i])) {
+      r.sections = next;
+      changed(true);
+    }
+  }
+  drag = null;
+}
+editor.addEventListener('pointerup', endDrag);
+editor.addEventListener('pointercancel', endDrag);
+
 editor.addEventListener('click', (e) => {
+  if (suppressClick) {
+    suppressClick = false;
+    if ((e.target as HTMLElement).closest('summary')) {
+      e.preventDefault();
+      return;
+    }
+  }
   const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('button[data-action]');
   if (!btn) return;
   e.preventDefault(); // buttons live inside <summary>; don't toggle the card

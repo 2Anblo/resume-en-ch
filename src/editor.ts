@@ -117,8 +117,8 @@ function renderSection(s: Section, si: number, n: number, d: Dict, collapsed: Se
 
   return `
 <details class="card" data-section="${s.id}"${collapsed.has(s.id) ? '' : ' open'}>
-  <summary>
-    <span class="card-title">${esc(s.title) || '—'}</span><span class="kind">${d.kinds[s.kind]}</span>
+  <summary class="drag-zone" title="${esc(d.dragHint)}">
+    <span class="grip" aria-hidden="true">⠿</span><span class="card-title">${esc(s.title) || '—'}</span><span class="kind">${d.kinds[s.kind]}</span>
     <span class="row-actions">${moveBtns('moveSection', `${si}`, si, n, d)}${iconBtn('removeSection', `${si}`, d.remove, '✕', true)}</span>
   </summary>
   <div class="grid">${field(d.sectionTitle, `${p}.title`, s.title, { wide: true })}</div>

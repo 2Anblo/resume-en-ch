@@ -24,7 +24,12 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - run: npm ci
+      # The registry occasionally resets connections from runners (ECONNRESET); retry instead of failing the deploy.
+      - run: |
+          npm config set fetch-retries 5
+          npm config set fetch-retry-mintimeout 20000
+          for i in 1 2 3; do npm ci && exit 0; echo "npm ci failed (attempt $i), retrying..."; sleep 15; done
+          exit 1
       - run: npm test
       - run: npm run build
       - uses: actions/upload-pages-artifact@v3

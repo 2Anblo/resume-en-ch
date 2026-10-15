@@ -61,6 +61,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .btn.primary:hover { filter: brightness(1.08); }
 .btn.small { padding: 3px 10px; font-size: 13px; }
 .btn.ghost { background: transparent; }
+.btn[aria-pressed='true'] { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+.redact-notice { font-size: 12px; max-width: 720px; margin: 0 0 12px; padding: 6px 12px; border-radius: 6px; background: color-mix(in srgb, var(--accent) 12%, transparent); border: 1px solid var(--accent); }
 .ui-lang { min-width: 40px; justify-content: center; }
 
 /* ---------- layout ---------- */
@@ -142,7 +144,7 @@ summary.drag-zone { touch-action: none; user-select: none; }
 /* ---------- print: only the resume ---------- */
 @media print {
   html, body { height: auto; background: #fff; display: block; }
-  .topbar, .editor, .hint, .page-break { display: none !important; }
+  .topbar, .editor, .hint, .redact-notice, .page-break { display: none !important; }
   .layout, .stage { display: block; padding: 0; overflow: visible; background: #fff; }
   .page-wrap { width: auto !important; height: auto !important; }
   .page-wrap .page { position: static; transform: none !important; box-shadow: none; width: auto; min-height: 0; }

@@ -5,6 +5,7 @@ import { sampleEn, sampleZh } from '../src/samples';
 import { renderJake } from '../src/templates/jake';
 import { renderZh } from '../src/templates/zh';
 import { renderNg } from '../src/templates/ng';
+import { redact } from '../src/redact';
 
 describe('util', () => {
   it('escapes HTML', () => {
@@ -114,5 +115,26 @@ describe('ensureExam', () => {
     expect(s.kind).toBe('exam');
     expect(s.entries[0]).toMatchObject({ title: '北京大学', subtitle: '计算机' });
     expect(s.skills).toEqual([{ label: '政治', value: '70' }, { label: '英语（一）', value: '75' }]);
+  });
+});
+
+describe('redact', () => {
+  it('masks personal details in the English sample', () => {
+    const src = sampleEn();
+    const html = renderJake(redact(src));
+    for (const leak of ['Jake Ryan', '123-456-7890', 'jake@su.edu', 'linkedin.com/in/jake', 'Southwestern', 'Blinn', 'Bachelor', 'mailto:jake', 'github.com/jake']) {
+      expect(html).not.toContain(leak);
+    }
+    expect(html).toContain('███ University');
+    expect(html).toContain('Gitlytics');
+    expect(src.name).toBe('Jake Ryan'); // the original is untouched
+  });
+  it('masks personal details in the Chinese sample', () => {
+    const r = sampleZh();
+    r.photo = 'data:image/jpeg;base64,xx';
+    const html = renderZh(redact(r));
+    for (const leak of ['张三', '138', 'zhangsan', '复旦', '南京大学', '硕士', '本科', '<img']) expect(html).not.toContain(leak);
+    expect(html).toContain('███大学');
+    expect(html).toContain('某互联网科技有限公司');
   });
 });

@@ -27,12 +27,14 @@
       <button type="button" class="btn ghost" id="export" data-i18n="exportJson"></button>
       <button type="button" class="btn ghost" id="export-tex" data-i18n="exportTex" data-i18n-title="exportTexHint"></button>
       <button type="button" class="btn ghost" id="reset" data-i18n="reset"></button>
+      <button type="button" class="btn ghost" id="redact" aria-pressed="false" data-i18n-title="redactTip"></button>
       <button type="button" class="btn ghost ui-lang" id="ui-lang" title="界面语言 / UI language"></button>
       <button type="button" class="btn primary" id="download" data-i18n-title="printTip"><span data-i18n="download"></span></button>
     </header>
     <main class="layout">
       <aside id="editor" class="editor" aria-label="Editor"></aside>
       <section id="stage" class="stage">
+        <p class="redact-notice" id="redact-notice" hidden data-i18n="redactNotice"></p>
         <div class="page-wrap"><div id="page" class="page"></div></div>
         <p class="hint"><span data-i18n="printTip"></span> · <span data-i18n="saved"></span> · <a href="https://github.com/2Anblo/resume-en-ch" target="_blank" rel="noopener" data-i18n="source"></a></p>
       </section>

@@ -12,6 +12,7 @@ import './styles/resume.css';
 import { applyAction, renderEditor, setPath } from './editor';
 import { t, type UiLang } from './i18n';
 import { toLatex } from './latex';
+import { redact } from './redact';
 import { ensureExam, load, normalize, sample, save } from './store';
 import { templateOf, templatesFor } from './templates';
 import type { Lang, PageSize, Resume, TemplateId } from './types';
@@ -29,6 +30,8 @@ let lang: Lang = prefs.lang === 'zh' || prefs.lang === 'en' ? prefs.lang : 'en';
 let ui: UiLang = prefs.ui === 'en' || prefs.ui === 'zh' ? prefs.ui : navigator.language.toLowerCase().startsWith('zh') ? 'zh' : 'en';
 const docs: Record<Lang, Resume> = { en: load('en'), zh: load('zh') };
 const collapsed = new Set<string>();
+/** Not persisted: forgetting it is on would send a masked resume to a real employer. */
+let redacted = false;
 const cur = () => docs[lang];
 
 const $ = <T extends HTMLElement>(sel: string) => document.querySelector(sel) as T;
@@ -47,7 +50,8 @@ function savePrefs() {
 function renderPreview() {
   const r = cur();
   page.dataset.size = r.pageSize;
-  page.innerHTML = templateOf(r).render(r);
+  const shown = redacted ? redact(r) : r;
+  page.innerHTML = templateOf(shown).render(shown);
   // Zero @page margin leaves browsers no room for their date/URL header and footer;
   // the template's own padding (cloned onto every printed page) provides the margins.
   pageStyle.textContent = `@page { size: ${r.pageSize === 'a4' ? 'A4' : 'letter'}; margin: 0; }`;
@@ -64,6 +68,10 @@ function renderAll() {
     el.title = d[el.dataset.i18nTitle as keyof typeof d] as string;
   });
   document.querySelectorAll<HTMLButtonElement>('[data-tpl]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tpl === lang)));
+  const redactBtn = $<HTMLButtonElement>('#redact');
+  redactBtn.textContent = redacted ? d.redactOn : d.redact;
+  redactBtn.setAttribute('aria-pressed', String(redacted));
+  $('#redact-notice').hidden = !redacted;
   $<HTMLButtonElement>('#ui-lang').textContent = ui === 'zh' ? 'EN' : '中';
   $<HTMLSelectElement>('#page-size').value = cur().pageSize;
   $<HTMLSelectElement>('#template').innerHTML = templatesFor(lang)
@@ -290,6 +298,11 @@ $('#ui-lang').addEventListener('click', () => {
   renderAll();
 });
 
+$('#redact').addEventListener('click', () => {
+  redacted = !redacted;
+  renderAll();
+});
+
 $<HTMLSelectElement>('#page-size').addEventListener('change', (e) => {
   cur().pageSize = (e.target as HTMLSelectElement).value as PageSize;
   changed();
@@ -311,7 +324,7 @@ $('#reset').addEventListener('click', () => {
 });
 
 function fileName(ext: string) {
-  const base = (cur().name.trim() || 'resume').replace(/[\\/:*?"<>|\s]+/g, '_');
+  const base = (redacted ? 'redacted' : cur().name.trim() || 'resume').replace(/[\\/:*?"<>|\s]+/g, '_');
   return `${base}_${lang === 'en' ? 'Resume' : '简历'}.${ext}`;
 }
 
@@ -326,7 +339,7 @@ function downloadText(text: string, type: string, name: string) {
 
 $('#export').addEventListener('click', () => downloadText(JSON.stringify(cur(), null, 2), 'application/json', fileName('json')));
 
-$('#export-tex').addEventListener('click', () => downloadText(toLatex(cur()), 'application/x-tex', fileName('tex')));
+$('#export-tex').addEventListener('click', () => downloadText(toLatex(redacted ? redact(cur()) : cur()), 'application/x-tex', fileName('tex')));
 
 $<HTMLInputElement>('#import-file').addEventListener('change', async (e) => {
   const input = e.target as HTMLInputElement;

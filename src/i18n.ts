@@ -21,6 +21,9 @@ const dict = {
     up: '上移', down: '下移', remove: '删除', dragHint: '按住拖动可调整模块顺序，点击展开/收起',
     printTip: '点击“下载 PDF”后，在打印窗口的目标打印机中选择“另存为 PDF”即可（若仍看到页眉页脚，取消勾选“页眉和页脚”）。',
     saved: '已自动保存到本浏览器', source: '开源代码',
+    redact: '一键脱敏', redactOn: '已脱敏',
+    redactTip: '隐藏姓名、照片、手机、邮箱、地址、链接，以及学校、学历和就读地点，方便发到平台请人修改。只影响预览和下载的 PDF，不会改动你填写的内容。',
+    redactNotice: '脱敏预览：下载的 PDF 同样已隐藏个人信息，左侧编辑内容未改动。发布前请再检查一遍正文里是否还有可识别信息（如公司名）。',
   },
   en: {
     tplEn: 'English', tplEnHint: "Jake's Resume (classic Overleaf template)",
@@ -42,6 +45,9 @@ const dict = {
     up: 'Move up', down: 'Move down', remove: 'Delete', dragHint: 'Drag to reorder sections; click to expand or collapse',
     printTip: 'After clicking "Download PDF", pick "Save as PDF" as the destination (if you still see a header or footer, untick "Headers and footers").',
     saved: 'Saved in this browser automatically', source: 'Source',
+    redact: 'Redact', redactOn: 'Redacted',
+    redactTip: 'Hide your name, photo, phone, email, address, links, and your schools, degrees and their locations, so you can post the resume for feedback. Only the preview and the downloaded PDF change; your data stays as is.',
+    redactNotice: 'Redacted preview: the downloaded PDF hides your personal details too; the editor is unchanged. Check the text once more for anything identifying (e.g. company names) before posting.',
   },
 };
 

@@ -62,6 +62,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .btn.small { padding: 3px 10px; font-size: 13px; }
 .btn.ghost { background: transparent; }
 .btn[aria-pressed='true'] { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+.btn[hidden] { display: none; }
+#sync:not([hidden]) { display: inline-block; max-width: 220px; overflow: hidden; text-overflow: ellipsis; }
 .redact-notice { font-size: 12px; max-width: 720px; margin: 0 0 12px; padding: 6px 12px; border-radius: 6px; background: color-mix(in srgb, var(--accent) 12%, transparent); border: 1px solid var(--accent); }
 .ui-lang { min-width: 40px; justify-content: center; }
 

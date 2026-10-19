@@ -14,6 +14,7 @@ import { t, type UiLang } from './i18n';
 import { toLatex } from './latex';
 import { redact } from './redact';
 import { ensureExam, load, normalize, sample, save } from './store';
+import { canSync, pickFile, watchFile, type FileSource } from './sync';
 import { templateOf, templatesFor } from './templates';
 import type { Lang, PageSize, Resume, TemplateId } from './types';
 
@@ -32,6 +33,8 @@ const docs: Record<Lang, Resume> = { en: load('en'), zh: load('zh') };
 const collapsed = new Set<string>();
 /** Not persisted: forgetting it is on would send a masked resume to a real employer. */
 let redacted = false;
+/** The local file being followed by "Live sync", if any. One-way: page edits are not written back. */
+let sync: { name: string; stop: () => void } | null = null;
 const cur = () => docs[lang];
 
 const $ = <T extends HTMLElement>(sel: string) => document.querySelector(sel) as T;
@@ -72,6 +75,7 @@ function renderAll() {
   redactBtn.textContent = redacted ? d.redactOn : d.redact;
   redactBtn.setAttribute('aria-pressed', String(redacted));
   $('#redact-notice').hidden = !redacted;
+  renderSync();
   $<HTMLButtonElement>('#ui-lang').textContent = ui === 'zh' ? 'EN' : '中';
   $<HTMLSelectElement>('#page-size').value = cur().pageSize;
   $<HTMLSelectElement>('#template').innerHTML = templatesFor(lang)
@@ -79,6 +83,20 @@ function renderAll() {
     .join('');
   editor.innerHTML = renderEditor(cur(), d, collapsed);
   renderPreview();
+}
+
+function renderSync() {
+  const d = t(ui);
+  const btn = $<HTMLButtonElement>('#sync');
+  btn.textContent = sync ? `${d.syncOn} · ${sync.name}` : d.sync;
+  btn.title = sync ? d.syncStop : d.syncTip;
+  btn.setAttribute('aria-pressed', String(!!sync));
+}
+
+function stopSync() {
+  sync?.stop();
+  sync = null;
+  renderSync();
 }
 
 let saveTimer = 0;
@@ -341,21 +359,66 @@ $('#export').addEventListener('click', () => downloadText(JSON.stringify(cur(), 
 
 $('#export-tex').addEventListener('click', () => downloadText(toLatex(redacted ? redact(cur()) : cur()), 'application/x-tex', fileName('tex')));
 
+/** Loads an exported resume JSON into the page. Throws if `text` is not valid JSON. */
+function importText(text: string) {
+  const r = normalize(JSON.parse(text.replace(/^﻿/, '')), lang);
+  lang = r.lang;
+  docs[lang] = r;
+  save(r);
+  savePrefs();
+  const y = editor.scrollTop;
+  renderAll();
+  editor.scrollTop = y;
+}
+
 $<HTMLInputElement>('#import-file').addEventListener('change', async (e) => {
   const input = e.target as HTMLInputElement;
   const file = input.files?.[0];
   input.value = '';
   if (!file) return;
   try {
-    const r = normalize(JSON.parse(await file.text()), lang);
-    lang = r.lang;
-    docs[lang] = r;
-    save(r);
-    savePrefs();
-    renderAll();
+    importText(await file.text());
   } catch {
     alert(t(ui).importError);
   }
+});
+
+/* ---------- live sync with a local file (e.g. one an AI agent edits over MCP) ---------- */
+const syncBtn = $<HTMLButtonElement>('#sync');
+syncBtn.hidden = !canSync();
+syncBtn.addEventListener('click', async () => {
+  if (sync) {
+    stopSync();
+    return;
+  }
+  let source: FileSource | null;
+  try {
+    source = await pickFile();
+  } catch {
+    alert(t(ui).importError);
+    return;
+  }
+  if (!source) return;
+  sync = {
+    name: source.name,
+    stop: watchFile(
+      source,
+      (text) => {
+        // A half-written or hand-broken file: keep the last good version and try again on the next change.
+        try {
+          importText(text);
+        } catch {
+          /* ignore */
+        }
+      },
+      () => {
+        const name = sync?.name ?? '';
+        stopSync();
+        alert(`${t(ui).syncLost} ${name}`);
+      },
+    ),
+  };
+  renderSync();
 });
 
 $('#download').addEventListener('click', async () => {

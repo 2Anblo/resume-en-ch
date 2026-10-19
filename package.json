@@ -5,13 +5,25 @@
   "description": "Open-source English / Chinese resume generator: Jake's Resume style English template and a clean Chinese template, exported to PDF in the browser.",
   "license": "MIT",
   "type": "module",
+  "bin": {
+    "resume-en-ch": "bin/resume-en-ch-mcp.js",
+    "resume-en-ch-mcp": "bin/resume-en-ch-mcp.js"
+  },
+  "files": [
+    "bin",
+    "dist-mcp"
+  ],
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "build": "tsc --noEmit && vite build && npm run build:mcp",
+    "build:mcp": "vite build -c vite.mcp.config.ts",
+    "prepare": "npm run build:mcp",
+    "mcp": "node bin/resume-en-ch-mcp.js",
     "preview": "vite preview",
     "test": "vitest run"
   },
   "devDependencies": {
+    "@types/node": "^24.19.2",
     "typescript": "^7.0.2",
     "vite": "^8.3.1",
     "vitest": "^5.0.2"
@@ -20,6 +32,8 @@
     "@fontsource/noto-sans-sc": "^5.3.0",
     "@fontsource/noto-serif-sc": "^5.3.0",
     "@fontsource/tinos": "^5.3.0",
-    "lxgw-wenkai-webfont": "^1.7.0"
+    "@modelcontextprotocol/sdk": "^1.32.1",
+    "lxgw-wenkai-webfont": "^1.7.0",
+    "zod": "^4.6.7"
   }
 }

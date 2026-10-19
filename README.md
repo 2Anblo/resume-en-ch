@@ -35,6 +35,41 @@
 
 推荐使用 Chrome / Edge，排版与预览最一致。
 
+## 配合 AI Agent 使用（MCP）
+
+仓库自带一个本地 [MCP](https://modelcontextprotocol.io) 服务器，Claude Code、Claude Desktop、Cursor 等支持 MCP 的 agent 可以通过它读取、修改你的简历并给出建议。它在你自己的电脑上通过 stdio 运行，只读写你指定的那个 JSON 文件，不联网、不上传任何数据。
+
+工作流程：
+
+1. 在网页上点「导出 JSON」，得到例如 `~/resume.json`
+2. 让 agent 通过 MCP 修改这个文件（每次修改都会校验格式并立即保存）
+3. 回到网页点「导入 JSON」，选同一个文件，就能看到修改后的预览并导出 PDF
+
+用 Chrome / Edge 时可以改点「实时同步」并选这个文件：之后 agent 每改一次，预览都会自动更新，不用反复导入（单向同步，网页上的编辑不会写回文件；重新打开网页后需要再点一次）。
+
+Claude Code：
+
+```bash
+claude mcp add resume -- npx -y github:2Anblo/resume-en-ch /绝对路径/resume.json
+```
+
+Claude Desktop（`claude_desktop_config.json`，Cursor 的 `.cursor/mcp.json` 格式相同）：
+
+```json
+{
+  "mcpServers": {
+    "resume": {
+      "command": "npx",
+      "args": ["-y", "github:2Anblo/resume-en-ch", "/绝对路径/resume.json"]
+    }
+  }
+}
+```
+
+也可以克隆仓库后运行 `npm install`（会自动构建 `dist-mcp/`），再把命令换成 `node /仓库路径/bin/resume-en-ch-mcp.js /绝对路径/resume.json`；执行 `npm link` 后还可以直接用 `resume-en-ch-mcp <文件>`。
+
+提供的工具：`get_resume`、`list_sections`、`update_basics`、`add/update/remove/move_section`、`add/update/remove/move_entry`、`set_skills`、`list_templates`、`set_template`、`render_html`、`export_latex`，以及 `get_redacted`（返回一键脱敏后的 JSON，想把简历发到论坛求点评时用它）。另有 `review_resume` 提示词，让 agent 先通读简历再给出修改建议。
+
 ## 本地开发
 
 ```bash
@@ -63,6 +98,9 @@ src/
   latex.ts            导出 LaTeX（.tex）
   store.ts            本地存储与 JSON 导入校验
   samples.ts          示例数据
+mcp/
+  server.ts           本地 MCP 服务器（stdio）
+  tools.ts            MCP 工具：读写简历 JSON 文件
 ```
 
 新增模板：在 `src/templates/` 写一个 `render(resume) => html` 函数，在 `src/templates/index.ts` 注册，并在 `resume.css` 里加样式即可。
@@ -92,6 +130,27 @@ An open-source, client-side resume generator for English and Chinese resumes. Ed
 - Letter / A4, with page-break guides in the preview
 
 **Saving the PDF:** click *Download PDF*, choose *Save as PDF* as the destination (not *Microsoft Print to PDF*, which drops clickable links), and under *More settings* untick *Headers and footers* so the browser does not add the date, URL and page numbers (see the screenshot above; Chrome remembers it). Chrome or Edge gives the closest match to the preview.
+
+**Use with AI agents (MCP):** a local [MCP](https://modelcontextprotocol.io) server lets Claude Code, Claude Desktop, Cursor or any MCP client read and edit your resume and give feedback on it. It runs on your machine over stdio and only touches the JSON file you pass it; nothing is uploaded. The workflow: click *Export JSON* in the site → the agent edits that file through MCP (every write is validated and saved immediately) → click *Import JSON* and pick the same file to see the result and print the PDF. In Chrome or Edge, click *Live sync* and pick the file instead: the preview then updates on every edit the agent makes (one-way; edits made in the site are not written back, and you pick the file again after reopening the page).
+
+```bash
+claude mcp add resume -- npx -y github:2Anblo/resume-en-ch /absolute/path/resume.json
+```
+
+For Claude Desktop (`claude_desktop_config.json`; Cursor's `.cursor/mcp.json` uses the same shape):
+
+```json
+{
+  "mcpServers": {
+    "resume": {
+      "command": "npx",
+      "args": ["-y", "github:2Anblo/resume-en-ch", "/absolute/path/resume.json"]
+    }
+  }
+}
+```
+
+From a clone, `npm install` builds `dist-mcp/`; use `node /path/to/repo/bin/resume-en-ch-mcp.js /absolute/path/resume.json` as the command, or `npm link` once and run `resume-en-ch-mcp <file>`. Tools: `get_resume`, `list_sections`, `update_basics`, `add/update/remove/move_section`, `add/update/remove/move_entry`, `set_skills`, `list_templates`, `set_template`, `render_html`, `export_latex`, and `get_redacted` (the one-click redacted copy, for posting your resume publicly to ask for feedback). A `review_resume` prompt asks the agent to read the resume and suggest changes.
 
 **Development:** `npm install`, `npm run dev`, `npm test`, `npm run build`.
 

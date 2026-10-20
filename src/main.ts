@@ -33,15 +33,8 @@ const docs: Record<Lang, Resume> = { en: load('en'), zh: load('zh') };
 const collapsed = new Set<string>();
 /** Not persisted: forgetting it is on would send a masked resume to a real employer. */
 let redacted = false;
-/**
- * The local file kept in step by "Live sync", if any. `lang` is the resume it holds (known once
- * loaded); only edits to that resume are written back.
- */
-interface Sync {
-  file: FileSync;
-  lang: Lang | null;
-}
-let sync: Sync | null = null;
+/** Local files kept in step by "Live sync": one per resume language, so both can be edited on one page. */
+const syncs: Partial<Record<Lang, FileSync>> = {};
 const cur = () => docs[lang];
 
 const $ = <T extends HTMLElement>(sel: string) => document.querySelector(sel) as T;
@@ -95,15 +88,17 @@ function renderAll() {
 function renderSync() {
   const d = t(ui);
   const btn = $<HTMLButtonElement>('#sync');
-  const f = sync?.file;
+  const f = syncs[lang];
   btn.textContent = f ? `${f.writable ? d.syncOn : d.syncReadOnly} · ${f.source.name}` : d.sync;
   btn.title = f ? (f.writable ? d.syncStop : d.syncReadOnlyTip + d.syncStop) : d.syncTip;
   btn.setAttribute('aria-pressed', String(!!f));
+  // A dot on each language tab whose resume is synced, so the other tab's sync is not forgotten.
+  document.querySelectorAll<HTMLButtonElement>('[data-tpl]').forEach((b) => b.classList.toggle('synced', !!syncs[b.dataset.tpl as Lang]));
 }
 
-function stopSync() {
-  sync?.file.stop();
-  sync = null;
+function stopSync(l: Lang) {
+  syncs[l]?.stop();
+  delete syncs[l];
   renderSync();
 }
 
@@ -120,9 +115,9 @@ function changed(rerenderEditor = false) {
   fileEdited();
 }
 
-/** Tells live sync the page changed, if the synced file holds the resume being edited. */
+/** Tells live sync the open resume changed, if a file is synced for it. */
 function fileEdited() {
-  if (sync && sync.lang === lang) sync.file.edited();
+  syncs[lang]?.edited();
 }
 
 /* ---------- preview scaling ---------- */
@@ -374,13 +369,18 @@ $('#export').addEventListener('click', () => downloadText(JSON.stringify(cur(), 
 
 $('#export-tex').addEventListener('click', () => downloadText(toLatex(redacted ? redact(cur()) : cur()), 'application/x-tex', fileName('tex')));
 
-/** Loads an exported resume JSON into the page. Throws if `text` is not valid JSON. */
-function importText(text: string) {
-  const r = normalize(JSON.parse(text.replace(/^﻿/, '')), lang);
-  lang = r.lang;
-  docs[lang] = r;
+/** Parses an exported resume JSON. Throws if `text` is not valid JSON. */
+const parseResume = (text: string, fallback: Lang): Resume => normalize(JSON.parse(text.replace(/^﻿/, '')), fallback);
+
+/** Puts `r` in its language's slot, switching to that tab when `show`; redraws only if it is on screen. */
+function applyResume(r: Resume, show: boolean) {
+  docs[r.lang] = r;
   save(r);
-  savePrefs();
+  if (show && r.lang !== lang) {
+    lang = r.lang;
+    savePrefs();
+  }
+  if (r.lang !== lang) return;
   // Keep the editor where it was, including the focused field, when the file is reloaded under it.
   const y = editor.scrollTop;
   const focused = (document.activeElement as HTMLElement | null)?.dataset?.path;
@@ -395,7 +395,7 @@ $<HTMLInputElement>('#import-file').addEventListener('change', async (e) => {
   input.value = '';
   if (!file) return;
   try {
-    importText(await file.text());
+    applyResume(parseResume(await file.text(), lang), true);
     fileEdited();
   } catch {
     alert(t(ui).importError);
@@ -406,9 +406,10 @@ $<HTMLInputElement>('#import-file').addEventListener('change', async (e) => {
 const syncBtn = $<HTMLButtonElement>('#sync');
 syncBtn.hidden = !canSync();
 syncBtn.addEventListener('click', async () => {
-  if (sync) {
-    await sync.file.flush();
-    stopSync();
+  const current = syncs[lang];
+  if (current) {
+    await current.flush();
+    stopSync(lang);
     return;
   }
   let source: FileSource | null;
@@ -420,31 +421,56 @@ syncBtn.addEventListener('click', async () => {
   }
   if (!source) return;
   const writable = await requestWrite(source);
-  const s: Sync = { lang: null, file: null! };
-  s.file = new FileSync(
+  // The file's own language decides which resume it syncs with, whichever tab is open.
+  let fileLang: Lang;
+  try {
+    fileLang = parseResume(await (await source.getFile()).text(), lang).lang;
+  } catch {
+    alert(t(ui).importError);
+    return;
+  }
+  const old = syncs[fileLang];
+  if (old) {
+    await old.flush();
+    old.stop();
+  }
+  const name = source.name;
+  const file = new FileSync(
     source,
     {
       load(text) {
-        importText(text);
-        s.lang = lang;
+        applyResume({ ...parseResume(text, fileLang), lang: fileLang }, false);
       },
-      dump: () => JSON.stringify(docs[s.lang ?? lang], null, 2) + '\n',
-      conflict: askConflict,
+      dump: () => JSON.stringify(docs[fileLang], null, 2) + '\n',
+      conflict: () => askConflict(name),
       fail() {
-        stopSync();
-        alert(`${t(ui).syncLost} ${source.name}`);
+        if (syncs[fileLang] === file) stopSync(fileLang);
+        alert(`${t(ui).syncLost} ${name}`);
       },
     },
     writable,
   );
-  sync = s;
-  renderSync();
-  s.file.start();
+  syncs[fileLang] = file;
+  if (fileLang !== lang) {
+    lang = fileLang;
+    savePrefs();
+    renderAll();
+  } else renderSync();
+  file.start();
 });
 
+/** One conflict dialog at a time: with two files synced, both could ask at once. */
+let conflictQueue: Promise<unknown> = Promise.resolve();
+function askConflict(name: string): Promise<Resolution> {
+  const next = conflictQueue.then(() => showConflict(name));
+  conflictQueue = next.catch(() => {});
+  return next;
+}
+
 /** Modal choice between the file's and the page's version; it cannot be dismissed without choosing. */
-function askConflict(): Promise<Resolution> {
+function showConflict(name: string): Promise<Resolution> {
   const dlg = $<HTMLDialogElement>('#conflict');
+  $('#conflict-file').textContent = name;
   return new Promise((resolve) => {
     let chosen = false;
     const onClick = (e: Event) => {
@@ -467,8 +493,9 @@ function askConflict(): Promise<Resolution> {
 $<HTMLDialogElement>('#conflict').addEventListener('cancel', (e) => e.preventDefault());
 
 window.addEventListener('beforeunload', (e) => {
-  if (!sync?.file.pending) return;
-  void sync.file.flush();
+  const pending = Object.values(syncs).filter((f) => f.pending);
+  if (!pending.length) return;
+  for (const f of pending) void f.flush();
   e.preventDefault();
 });
 

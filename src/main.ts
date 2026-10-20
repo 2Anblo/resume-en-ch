@@ -17,6 +17,7 @@ import { ensureExam, load, normalize, sample, save } from './store';
 import { canSync, FileSync, pickFile, requestWrite, type FileSource, type Resolution } from './sync';
 import { templateOf, templatesFor } from './templates';
 import type { Lang, PageSize, Resume, TemplateId } from './types';
+import { sourceOffset } from './util';
 
 const PREF = 'resume-en-ch:prefs';
 const prefs = (() => {
@@ -146,6 +147,62 @@ function drawBreaks() {
   }
 }
 new ResizeObserver(fitPreview).observe(stage);
+
+/* ---------- double-click the preview to edit that text ---------- */
+// Templates tag shown text with data-src (the editor field's data-path), plus data-line / data-off for
+// multi-line fields, so a double-click can put the caret at the same spot in the editor.
+
+/** How many characters of `el`'s text come before the point (x, y), or null if it is not inside `el`. */
+function textOffsetAt(el: HTMLElement, x: number, y: number): number | null {
+  let node: Node | null = null;
+  let offset = 0;
+  const pos = document.caretPositionFromPoint?.(x, y);
+  if (pos) {
+    node = pos.offsetNode;
+    offset = pos.offset;
+  } else {
+    const r = document.caretRangeFromPoint?.(x, y);
+    if (r) {
+      node = r.startContainer;
+      offset = r.startOffset;
+    }
+  }
+  if (!node || !el.contains(node)) return null;
+  const range = document.createRange();
+  range.setStart(el, 0);
+  range.setEnd(node, offset);
+  return range.toString().length;
+}
+
+page.addEventListener('dblclick', (e) => {
+  const el = (e.target as HTMLElement).closest<HTMLElement>('[data-src]');
+  const field = el && editor.querySelector<HTMLInputElement | HTMLTextAreaElement>(`[data-path="${CSS.escape(el.dataset.src!)}"]`);
+  if (!el || !field) return;
+  const value = field.value;
+  let start = 0;
+  for (let i = Number(el.dataset.line ?? 0); i > 0; i--) {
+    const nl = value.indexOf('\n', start);
+    if (nl < 0) break;
+    start = nl + 1;
+  }
+  const nl = value.indexOf('\n', start);
+  const end = nl < 0 ? value.length : nl;
+  const from = Math.min(end, start + Number(el.dataset.off ?? 0));
+  const shown = textOffsetAt(el, e.clientX, e.clientY);
+  // Redacted text differs from the field, so the offset is only clamped to the line there.
+  const pos = Math.min(end, from + (shown === null ? 0 : sourceOffset(value.slice(from, end), shown)));
+
+  window.getSelection()?.removeAllRanges(); // the word the double-click selected in the preview
+  const card = field.closest('details');
+  if (card && !card.open) card.open = true;
+  field.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  field.focus({ preventScroll: true });
+  field.setSelectionRange(pos, pos);
+  field.classList.remove('jump-flash');
+  void field.offsetWidth; // restart the animation on repeated jumps
+  field.classList.add('jump-flash');
+});
+editor.addEventListener('animationend', (e) => (e.target as HTMLElement).classList.remove('jump-flash'));
 
 /* ---------- editor events ---------- */
 editor.addEventListener('input', (e) => {

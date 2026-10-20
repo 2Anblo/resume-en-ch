@@ -115,6 +115,7 @@ summary.drag-zone { touch-action: none; user-select: none; }
 .drop-line::after { right: -5px; }
 .drop-line.noop { opacity: 0; }
 .card.just-dropped { animation: dropped 0.7s ease; }
+.field .jump-flash { animation: dropped 0.9s ease-out; }
 @keyframes dropped { 0% { box-shadow: 0 0 0 3px var(--accent); } 100% { box-shadow: 0 0 0 0 transparent; } }
 @media (prefers-reduced-motion: reduce) { .card, .drop-line { transition: none; } .card.just-dropped { animation: none; } }
 .kind { font-size: 12px; color: var(--muted); background: var(--bg); border-radius: 4px; padding: 0 6px; }

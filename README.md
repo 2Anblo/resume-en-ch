@@ -45,7 +45,7 @@
 2. 让 agent 通过 MCP 修改这个文件（每次修改都会校验格式并立即保存）
 3. 回到网页点「导入 JSON」，选同一个文件，就能看到修改后的预览并导出 PDF
 
-用 Chrome / Edge 时可以改点「实时同步」并选这个文件：之后 agent 每改一次，预览都会自动更新，不用反复导入（单向同步，网页上的编辑不会写回文件；重新打开网页后需要再点一次）。
+用 Chrome / Edge 时可以改点「实时同步」，选这个文件并允许浏览器编辑它：之后 agent 每改一次，预览都会自动更新；你在网页上的编辑停顿片刻后也会自动保存回这个文件。如果网页还有没保存的编辑时文件又被改了，会弹窗让你选择保留哪一边，不会悄悄覆盖。没有授予写入权限时退回只读同步；重新打开网页后需要再点一次。
 
 Claude Code：
 
@@ -131,7 +131,7 @@ An open-source, client-side resume generator for English and Chinese resumes. Ed
 
 **Saving the PDF:** click *Download PDF*, choose *Save as PDF* as the destination (not *Microsoft Print to PDF*, which drops clickable links), and under *More settings* untick *Headers and footers* so the browser does not add the date, URL and page numbers (see the screenshot above; Chrome remembers it). Chrome or Edge gives the closest match to the preview.
 
-**Use with AI agents (MCP):** a local [MCP](https://modelcontextprotocol.io) server lets Claude Code, Claude Desktop, Cursor or any MCP client read and edit your resume and give feedback on it. It runs on your machine over stdio and only touches the JSON file you pass it; nothing is uploaded. The workflow: click *Export JSON* in the site → the agent edits that file through MCP (every write is validated and saved immediately) → click *Import JSON* and pick the same file to see the result and print the PDF. In Chrome or Edge, click *Live sync* and pick the file instead: the preview then updates on every edit the agent makes (one-way; edits made in the site are not written back, and you pick the file again after reopening the page).
+**Use with AI agents (MCP):** a local [MCP](https://modelcontextprotocol.io) server lets Claude Code, Claude Desktop, Cursor or any MCP client read and edit your resume and give feedback on it. It runs on your machine over stdio and only touches the JSON file you pass it; nothing is uploaded. The workflow: click *Export JSON* in the site → the agent edits that file through MCP (every write is validated and saved immediately) → click *Import JSON* and pick the same file to see the result and print the PDF. In Chrome or Edge, click *Live sync*, pick the file and allow the browser to edit it instead: the preview then updates on every edit the agent makes, and your edits in the site are saved back to the file once you pause typing. If the file changes while the page has unsaved edits, you are asked which version to keep, so neither side silently overwrites the other. Without write permission it falls back to read-only sync; pick the file again after reopening the page.
 
 ```bash
 claude mcp add resume -- npx -y github:2Anblo/resume-en-ch /absolute/path/resume.json

@@ -14,7 +14,7 @@ import { t, type UiLang } from './i18n';
 import { toLatex } from './latex';
 import { redact } from './redact';
 import { ensureExam, load, normalize, sample, save } from './store';
-import { canSync, pickFile, watchFile, type FileSource } from './sync';
+import { canSync, FileSync, pickFile, requestWrite, type FileSource, type Resolution } from './sync';
 import { templateOf, templatesFor } from './templates';
 import type { Lang, PageSize, Resume, TemplateId } from './types';
 
@@ -33,8 +33,15 @@ const docs: Record<Lang, Resume> = { en: load('en'), zh: load('zh') };
 const collapsed = new Set<string>();
 /** Not persisted: forgetting it is on would send a masked resume to a real employer. */
 let redacted = false;
-/** The local file being followed by "Live sync", if any. One-way: page edits are not written back. */
-let sync: { name: string; stop: () => void } | null = null;
+/**
+ * The local file kept in step by "Live sync", if any. `lang` is the resume it holds (known once
+ * loaded); only edits to that resume are written back.
+ */
+interface Sync {
+  file: FileSync;
+  lang: Lang | null;
+}
+let sync: Sync | null = null;
 const cur = () => docs[lang];
 
 const $ = <T extends HTMLElement>(sel: string) => document.querySelector(sel) as T;
@@ -88,13 +95,14 @@ function renderAll() {
 function renderSync() {
   const d = t(ui);
   const btn = $<HTMLButtonElement>('#sync');
-  btn.textContent = sync ? `${d.syncOn} · ${sync.name}` : d.sync;
-  btn.title = sync ? d.syncStop : d.syncTip;
-  btn.setAttribute('aria-pressed', String(!!sync));
+  const f = sync?.file;
+  btn.textContent = f ? `${f.writable ? d.syncOn : d.syncReadOnly} · ${f.source.name}` : d.sync;
+  btn.title = f ? (f.writable ? d.syncStop : d.syncReadOnlyTip + d.syncStop) : d.syncTip;
+  btn.setAttribute('aria-pressed', String(!!f));
 }
 
 function stopSync() {
-  sync?.stop();
+  sync?.file.stop();
   sync = null;
   renderSync();
 }
@@ -109,6 +117,12 @@ function changed(rerenderEditor = false) {
   renderPreview();
   clearTimeout(saveTimer);
   saveTimer = window.setTimeout(() => save(cur()), 300);
+  fileEdited();
+}
+
+/** Tells live sync the page changed, if the synced file holds the resume being edited. */
+function fileEdited() {
+  if (sync && sync.lang === lang) sync.file.edited();
 }
 
 /* ---------- preview scaling ---------- */
@@ -339,6 +353,7 @@ $('#reset').addEventListener('click', () => {
   docs[lang] = sample(lang, cur().template);
   save(cur());
   renderAll();
+  fileEdited();
 });
 
 function fileName(ext: string) {
@@ -366,9 +381,12 @@ function importText(text: string) {
   docs[lang] = r;
   save(r);
   savePrefs();
+  // Keep the editor where it was, including the focused field, when the file is reloaded under it.
   const y = editor.scrollTop;
+  const focused = (document.activeElement as HTMLElement | null)?.dataset?.path;
   renderAll();
   editor.scrollTop = y;
+  if (focused) editor.querySelector<HTMLElement>(`[data-path="${CSS.escape(focused)}"]`)?.focus({ preventScroll: true });
 }
 
 $<HTMLInputElement>('#import-file').addEventListener('change', async (e) => {
@@ -378,6 +396,7 @@ $<HTMLInputElement>('#import-file').addEventListener('change', async (e) => {
   if (!file) return;
   try {
     importText(await file.text());
+    fileEdited();
   } catch {
     alert(t(ui).importError);
   }
@@ -388,6 +407,7 @@ const syncBtn = $<HTMLButtonElement>('#sync');
 syncBtn.hidden = !canSync();
 syncBtn.addEventListener('click', async () => {
   if (sync) {
+    await sync.file.flush();
     stopSync();
     return;
   }
@@ -399,26 +419,57 @@ syncBtn.addEventListener('click', async () => {
     return;
   }
   if (!source) return;
-  sync = {
-    name: source.name,
-    stop: watchFile(
-      source,
-      (text) => {
-        // A half-written or hand-broken file: keep the last good version and try again on the next change.
-        try {
-          importText(text);
-        } catch {
-          /* ignore */
-        }
+  const writable = await requestWrite(source);
+  const s: Sync = { lang: null, file: null! };
+  s.file = new FileSync(
+    source,
+    {
+      load(text) {
+        importText(text);
+        s.lang = lang;
       },
-      () => {
-        const name = sync?.name ?? '';
+      dump: () => JSON.stringify(docs[s.lang ?? lang], null, 2) + '\n',
+      conflict: askConflict,
+      fail() {
         stopSync();
-        alert(`${t(ui).syncLost} ${name}`);
+        alert(`${t(ui).syncLost} ${source.name}`);
       },
-    ),
-  };
+    },
+    writable,
+  );
+  sync = s;
   renderSync();
+  s.file.start();
+});
+
+/** Modal choice between the file's and the page's version; it cannot be dismissed without choosing. */
+function askConflict(): Promise<Resolution> {
+  const dlg = $<HTMLDialogElement>('#conflict');
+  return new Promise((resolve) => {
+    let chosen = false;
+    const onClick = (e: Event) => {
+      const v = (e.target as HTMLElement).closest('button')?.value;
+      if (v !== 'file' && v !== 'page') return;
+      chosen = true;
+      dlg.removeEventListener('click', onClick);
+      dlg.removeEventListener('close', onClose);
+      dlg.close();
+      resolve(v);
+    };
+    const onClose = () => {
+      if (!chosen) dlg.showModal();
+    };
+    dlg.addEventListener('click', onClick);
+    dlg.addEventListener('close', onClose);
+    dlg.showModal();
+  });
+}
+$<HTMLDialogElement>('#conflict').addEventListener('cancel', (e) => e.preventDefault());
+
+window.addEventListener('beforeunload', (e) => {
+  if (!sync?.file.pending) return;
+  void sync.file.flush();
+  e.preventDefault();
 });
 
 $('#download').addEventListener('click', async () => {

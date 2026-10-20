@@ -67,6 +67,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .conflict::backdrop { background: rgb(0 0 0 / 0.45); }
 .conflict h2 { margin: 0 0 8px; font-size: 16px; }
 .conflict p { margin: 0; line-height: 1.6; }
+.conflict .conflict-file { margin-bottom: 6px; font-family: ui-monospace, monospace; font-size: 13px; color: var(--muted); }
+.tabs button.synced::after { content: ''; display: inline-block; width: 6px; height: 6px; margin-left: 6px; border-radius: 50%; background: var(--accent); vertical-align: middle; }
 .conflict-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-top: 16px; }
 #sync:not([hidden]) { display: inline-block; max-width: 220px; overflow: hidden; text-overflow: ellipsis; }
 .redact-notice { font-size: 12px; max-width: 720px; margin: 0 0 12px; padding: 6px 12px; border-radius: 6px; background: color-mix(in srgb, var(--accent) 12%, transparent); border: 1px solid var(--accent); }
